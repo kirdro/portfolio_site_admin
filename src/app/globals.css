@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=VT323&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили для киберпанк темы */
+@layer base {
+  * {
+    border-color: #1C2A25;
+  }
+  
+  body {
+    @apply bg-bg text-text-base font-sans;
+    background-image: 
+      linear-gradient(rgba(0, 255, 153, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 153, 0.03) 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+}
+
+/* Компоненты киберпанк стилей */
+@layer components {
+  /* Эффект скошенных углов */
+  .bevel {
+    clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+  }
+  
+  .bevel-sm {
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  /* Неоновое свечение текста */
+  .glyph-glow {
+    @apply animate-pulse-glow;
+    color: #00FF99;
+    text-shadow: 
+      0 0 5px #00FF99,
+      0 0 10px #00FF99,
+      0 0 15px #00FF99;
+  }
+
+  .glyph-glow-cyan {
+    @apply animate-pulse-glow;
+    color: #00FFCC;
+    text-shadow: 
+      0 0 5px #00FFCC,
+      0 0 10px #00FFCC,
+      0 0 15px #00FFCC;
+  }
+
+  /* Неоновые тени для элементов */
+  .shadow-neon {
+    box-shadow: 
+      0 0 5px #00FF99,
+      0 0 20px #00FF99,
+      0 0 35px #00FF99;
+  }
+
+  .shadow-neon-cyan {
+    box-shadow: 
+      0 0 5px #00FFCC,
+      0 0 20px #00FFCC,
+      0 0 35px #00FFCC;
+  }
+
+  /* Эффект сканлайнов */
+  .scanline {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .scanline::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00FF99, transparent);
+    animation: scanLine 3s linear infinite;
+    opacity: 0.6;
+  }
+
+  /* Глитч эффект для кнопок */
+  .btn-glitch {
+    position: relative;
+    background: #0F1214;
+    border: 1px solid #1C2A25;
+    color: #E6F4EF;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-glitch:hover {
+    background: #1A1F22;
+    box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .btn-glitch:active {
+    transform: translateY(0);
+  }
+
+  /* Киберпанк инпуты */
+  .cyber-input {
+    @apply bg-bg-subtle border border-line text-text-base;
+    @apply focus:border-neon-green focus:shadow-neon-soft focus:outline-none;
+    @apply transition-all duration-300;
+  }
+
+  /* Киберпанк карточки */
+  .cyber-card {
+    @apply bg-bg-subtle border border-line bevel-sm;
+    @apply hover:border-neon-green hover:shadow-neon-soft;
+    @apply transition-all duration-300;
+  }
+
+  /* Навигационные элементы */
+  .nav-link {
+    @apply text-text-subtle hover:text-neon-green;
+    @apply transition-colors duration-300;
+    position: relative;
+  }
+  
+  .nav-link.active {
+    @apply text-neon-green;
+  }
+  
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: #00FF99;
+    box-shadow: 0 0 5px #00FF99;
+  }
+}
+
+/* Утилиты */
+@layer utilities {
+  .text-shadow-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .border-glow {
+    border-color: #00FF99;
+    box-shadow: 0 0 5px #00FF99;
+  }
+  
+  .scrollbar-cyber {
+    scrollbar-width: thin;
+    scrollbar-color: #00FF99 #0F1214;
+  }
+  
+  .scrollbar-cyber::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .scrollbar-cyber::-webkit-scrollbar-track {
+    background: #0F1214;
+  }
+  
+  .scrollbar-cyber::-webkit-scrollbar-thumb {
+    background: #00FF99;
+    border-radius: 0px;
+    box-shadow: 0 0 5px #00FF99;
+  }
+}

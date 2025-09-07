@@ -1,0 +1,176 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Jura:wght@300;400;500;600;700&family=VT323&display=swap');
+
+@theme {
+  /* Киберпанк цветовая палитра */
+  --color-bg: #0B0D0E;
+  --color-bg-subtle: #0F1214;
+  --color-bg-hover: #1A1F22;
+  
+  --color-text-base: #E6F4EF;
+  --color-text-subtle: #B8C5C0;
+  
+  --color-neon-green: #00FF99;
+  --color-neon-cyan: #00FFCC;
+  
+  --color-line: #1C2A25;
+  
+  /* Шрифты */
+  --font-family-sans: "Jura", system-ui, sans-serif;
+  --font-family-mono: "VT323", "Courier New", monospace;
+  
+  /* Анимации */
+  --animate-pulse-glow: pulseGlow 2s ease-in-out infinite alternate;
+  --animate-scan-line: scanLine 3s linear infinite;
+}
+
+@keyframes pulseGlow {
+  0% { 
+    text-shadow: 0 0 5px #00FF99, 0 0 10px #00FF99, 0 0 15px #00FF99;
+  }
+  100% { 
+    text-shadow: 0 0 10px #00FF99, 0 0 20px #00FF99, 0 0 30px #00FF99;
+  }
+}
+
+@keyframes scanLine {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+
+/* Базовые стили */
+* {
+  border-color: var(--color-line);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text-base);
+  font-family: var(--font-family-sans);
+  background-image: 
+    linear-gradient(rgba(0, 255, 153, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 153, 0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Компоненты */
+.bevel {
+  clip-path: polygon(0 0, calc(100% - 15px) 0, 100% 15px, 100% 100%, 15px 100%, 0 calc(100% - 15px));
+}
+
+.bevel-sm {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.glyph-glow {
+  color: var(--color-neon-green);
+  text-shadow: 
+    0 0 5px var(--color-neon-green),
+    0 0 10px var(--color-neon-green),
+    0 0 15px var(--color-neon-green);
+  animation: var(--animate-pulse-glow);
+}
+
+.glyph-glow-cyan {
+  color: var(--color-neon-cyan);
+  text-shadow: 
+    0 0 5px var(--color-neon-cyan),
+    0 0 10px var(--color-neon-cyan),
+    0 0 15px var(--color-neon-cyan);
+  animation: var(--animate-pulse-glow);
+}
+
+.shadow-neon {
+  box-shadow: 
+    0 0 5px var(--color-neon-green),
+    0 0 20px var(--color-neon-green),
+    0 0 35px var(--color-neon-green);
+}
+
+.shadow-neon-cyan {
+  box-shadow: 
+    0 0 5px var(--color-neon-cyan),
+    0 0 20px var(--color-neon-cyan),
+    0 0 35px var(--color-neon-cyan);
+}
+
+.scanline {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanline::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-neon-green), transparent);
+  animation: var(--animate-scan-line);
+  opacity: 0.6;
+}
+
+.btn-glitch {
+  position: relative;
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-line);
+  color: var(--color-text-base);
+  transition: all 0.3s ease;
+}
+
+.btn-glitch:hover {
+  background: var(--color-bg-hover);
+  box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-glitch:active {
+  transform: translateY(0);
+}
+
+.cyber-input {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-line);
+  color: var(--color-text-base);
+  transition: all 0.3s ease;
+}
+
+.cyber-input:focus {
+  border-color: var(--color-neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+  outline: none;
+}
+
+.cyber-card {
+  background: var(--color-bg-subtle);
+  border: 1px solid var(--color-line);
+  transition: all 0.3s ease;
+}
+
+.cyber-card:hover {
+  border-color: var(--color-neon-green);
+  box-shadow: 0 0 10px rgba(0, 255, 153, 0.3);
+}
+
+.nav-link {
+  color: var(--color-text-subtle);
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: var(--color-neon-green);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--color-neon-green);
+  box-shadow: 0 0 5px var(--color-neon-green);
+}
