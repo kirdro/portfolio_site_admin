@@ -12,9 +12,15 @@ export interface ContactData {
   name: string;
   email: string;
   message: string;
+  subject?: string;
+  company?: string;
+  priority?: "low" | "medium" | "high" | "urgent";
   status: "new" | "in_progress" | "completed" | "rejected";
   createdAt: Date;
   updatedAt: Date;
+  adminNotes?: string;
+  responseText?: string;
+  respondedAt?: Date;
 }
 
 /**
@@ -42,7 +48,11 @@ export default function ContactsPage() {
   const { data: contactStats, isLoading: loadingStats } = api.contacts.getStats.useQuery();
 
   // Преобразуем данные для совместимости с интерфейсом
-  const mockContacts: ContactData[] = contactsData?.contacts || [];
+  const mockContacts: ContactData[] = (contactsData?.contacts || []).map(contact => ({
+    ...contact,
+    createdAt: new Date(contact.createdAt),
+    updatedAt: new Date(contact.createdAt), // Используем createdAt как fallback
+  }));
 
   // Обработчик выбора обращения для просмотра
   const обработчикВыбораОбращения = useCallback((contact: ContactData) => {
@@ -73,17 +83,17 @@ export default function ContactsPage() {
   // Статистика обращений из API
   const статистика = contactStats ? {
     всего: contactStats.totalContacts,
-    новые: contactStats.newContacts,
-    вРаботе: contactStats.inProgressContacts,
-    завершенные: contactStats.completedContacts,
-    отклоненные: contactStats.rejectedContacts,
+    новые: contactStats.byStatus?.new || 0,
+    вРаботе: contactStats.byStatus?.inProgress || 0,
+    завершенные: contactStats.byStatus?.completed || 0,
+    отклоненные: contactStats.byStatus?.rejected || 0,
     поПриоритету: {
       низкий: 0,
       средний: 0,
       высокий: 0,
-      срочный: contactStats.urgentContacts || 0,
+      срочный: 0,
     },
-    сОтветом: contactStats.respondedContacts || 0,
+    сОтветом: 0,
   } : {
     всего: 0,
     новые: 0,

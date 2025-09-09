@@ -176,6 +176,7 @@ export const aiChatRouter = createTRPCRouter({
           userId: input.диалогId,
           isAI: false, // Сообщение администратора считается пользовательским
           modelName: "admin",
+          updatedAt: new Date(),
         },
       });
 
@@ -467,6 +468,7 @@ export const aiChatRouter = createTRPCRouter({
             content: input.сообщение,
             userId: input.пользовательId,
             isAI: false,
+            updatedAt: new Date(),
           },
         });
 
@@ -479,11 +481,11 @@ export const aiChatRouter = createTRPCRouter({
 
         // Формируем контекст для AI
         const messages = [
-          { role: "system" as const, content: DEFAULT_SYSTEM_PROMPT },
+          { role: "system", content: DEFAULT_SYSTEM_PROMPT } as const,
           ...recentMessages.reverse().map(msg => ({
-            role: (msg.isAI ? "assistant" : "user") as const,
+            role: msg.isAI ? "assistant" : "user",
             content: msg.content,
-          }))
+          } as const))
         ];
 
         // Отправляем запрос к AI
@@ -500,6 +502,7 @@ export const aiChatRouter = createTRPCRouter({
             userId: input.пользовательId,
             isAI: true,
             modelName: aiResponse.model,
+            updatedAt: new Date(),
           },
         });
 

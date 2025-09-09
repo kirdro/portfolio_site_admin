@@ -76,7 +76,7 @@ export function ContactsList({
       const matchesSearch = searchQuery === "" || 
         contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         contact.company?.toLowerCase().includes(searchQuery.toLowerCase());
       
       const matchesStatus = filterStatus === "all" || contact.status === filterStatus;
@@ -89,7 +89,9 @@ export function ContactsList({
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       } else {
         const priorityOrder = { urgent: 4, high: 3, medium: 2, low: 1 };
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
+        const aPriority = a.priority || "medium";
+        const bPriority = b.priority || "medium";
+        return priorityOrder[bPriority as keyof typeof priorityOrder] - priorityOrder[aPriority as keyof typeof priorityOrder];
       }
     });
 
@@ -263,10 +265,10 @@ export function ContactsList({
                   <div className="flex items-center space-x-2">
                     {/* Приоритет */}
                     <span className={`px-2 py-1 rounded text-xs font-medium
-                      bg-${получитьЦветПриоритета(contact.priority)}/20 
-                      border border-${получитьЦветПриоритета(contact.priority)}/50
-                      text-${получитьЦветПриоритета(contact.priority)}`}>
-                      {contact.priority.toUpperCase()}
+                      bg-${получитьЦветПриоритета(contact.priority || "medium")}/20 
+                      border border-${получитьЦветПриоритета(contact.priority || "medium")}/50
+                      text-${получитьЦветПриоритета(contact.priority || "medium")}`}>
+                      {(contact.priority || "medium").toUpperCase()}
                     </span>
                   </div>
                 </div>

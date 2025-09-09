@@ -169,7 +169,16 @@ export default function UsersPage() {
 
       {/* Таблица пользователей */}
       <UsersTable
-        users={usersData?.users || []}
+        users={(usersData?.users || []).map(user => ({
+          ...user,
+          name: user.name || "Без имени",
+          email: user.email || "",
+          _count: {
+            projects: user._count.Project,
+            generalMessages: user._count.ChatMessage,
+            aiMessages: user._count.AiChatMessage,
+          },
+        }))}
         loading={isLoading}
         onUserClick={обработчикВыбораПользователя}
         pagination={usersData ? {

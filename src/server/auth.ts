@@ -10,6 +10,7 @@ const globalForPrisma = globalThis as unknown as {
 
 // Инициализируем Prisma клиент с синглтон паттерном
 export const prisma = globalForPrisma.prisma ?? new PrismaClient();
+export const db = prisma; // Экспорт для совместимости с другими частями приложения
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 

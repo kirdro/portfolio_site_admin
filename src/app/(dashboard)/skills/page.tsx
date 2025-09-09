@@ -39,7 +39,13 @@ export default function SkillsPage() {
   const { data: статистикаНавыков } = api.admin.skills.getStats.useQuery();
 
   // Обрабатываем данные для совместимости с существующими компонентами
-  const mockSkills = skills || [];
+  const mockSkills: SkillData[] = (skills || []).map(skill => ({
+    ...skill,
+    category: skill.category as "Frontend" | "Backend" | "DevOps" | "Tools" | "Other",
+    icon: skill.icon || "",
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  }));
   const статистика = {
     всего: статистикаНавыков?.totalSkills || 0,
     поКатегориям: {

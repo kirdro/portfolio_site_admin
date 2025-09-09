@@ -125,7 +125,11 @@ export default function ProjectsPage() {
 
         {/* Сетка проектов */}
         <ProjectsGrid
-          projects={projectsData?.projects || []}
+          projects={(projectsData?.projects || []).map(project => ({
+            ...project,
+            createdAt: new Date(project.createdAt),
+            updatedAt: new Date(project.updatedAt),
+          }))}
           loading={isLoading}
           onProjectClick={обработчикВыбораПроекта}
           onCreateProject={обработчикСозданияПроекта}

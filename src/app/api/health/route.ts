@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '~/server/db';
+import { db } from '../../../server/auth';
 
 /**
  * Health Check API endpoint для мониторинга статуса админ-панели

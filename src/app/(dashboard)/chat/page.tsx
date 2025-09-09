@@ -66,7 +66,11 @@ export default function ChatPage() {
     messagesLast7d: chatStats.messagesLast7d,
     activeUsers: chatStats.activeUsers,
     mostActiveUsers: chatStats.mostActiveUsers || [],
-    dailyActivity: chatStats.dailyActivity || [],
+    dailyActivity: (chatStats.dailyActivity || []).map((day: any) => ({
+      date: day.date || new Date().toISOString().split('T')[0],
+      generalMessages: day.generalMessages || 0,
+      aiMessages: day.aiMessages || 0,
+    })),
     moderationActions: chatStats.moderationActions || 0,
   } : {
     totalMessages: 0,
@@ -79,7 +83,7 @@ export default function ChatPage() {
   };
 
   // Преобразование данных из БД к формату интерфейса
-  const mockGeneralMessages: ChatMessageData[] = (generalMessages || []).map(msg => ({
+  const mockGeneralMessages: ChatMessageData[] = (generalMessages?.messages || []).map((msg: any) => ({
     id: msg.id,
     content: msg.content,
     userId: msg.User?.id || msg.userId,
@@ -91,7 +95,7 @@ export default function ChatPage() {
     isBlocked: false,
   }));
 
-  const mockAiMessages: ChatMessageData[] = (aiMessages || []).map(msg => ({
+  const mockAiMessages: ChatMessageData[] = (aiMessages?.messages || []).map((msg: any) => ({
     id: msg.id,
     content: msg.content,
     userId: msg.User?.id || msg.userId,

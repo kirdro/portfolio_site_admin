@@ -161,7 +161,7 @@ export function ContactDetail({
                       {contact.priority === "urgent" && "🚨"}
                     </span>
                     <span className="font-medium">
-                      {contact.priority.toUpperCase()}
+                      {contact.priority?.toUpperCase() || "СРЕДНИЙ"}
                     </span>
                   </div>
                 </div>
