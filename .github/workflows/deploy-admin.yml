@@ -1,0 +1,248 @@
+name: 🚀 Deploy Admin Panel to Production
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  typecheck:
+    name: 🔍 TypeScript Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🍞 Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: 📦 Install dependencies
+      run: bun install
+    
+    - name: 🏗 Generate Prisma client
+      run: bunx prisma generate
+      env:
+        DATABASE_URL: ${{ secrets.ADMIN_DATABASE_URL }}
+    
+    - name: 🔍 Type checking
+      run: bun run typecheck
+    
+    - name: 🧹 Linting (continue on warning)
+      run: bun run lint || true
+
+  build:
+    name: 🏗 Build Admin Panel
+    runs-on: ubuntu-latest
+    needs: typecheck
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🍞 Setup Bun  
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    
+    - name: 📦 Install dependencies
+      run: bun install
+    
+    - name: 🏗 Generate Prisma client
+      run: bunx prisma generate
+      env:
+        DATABASE_URL: ${{ secrets.ADMIN_DATABASE_URL }}
+    
+    - name: 🏗 Build Next.js application
+      run: bun run build
+      env:
+        DATABASE_URL: ${{ secrets.ADMIN_DATABASE_URL }}
+        NEXTAUTH_SECRET: ${{ secrets.ADMIN_NEXTAUTH_SECRET }}
+        NEXTAUTH_URL: ${{ secrets.ADMIN_NEXTAUTH_URL }}
+        AUTH_TRUST_HOST: ${{ secrets.ADMIN_AUTH_TRUST_HOST }}
+        AUTH_YANDEX_ID: ${{ secrets.ADMIN_AUTH_YANDEX_ID }}
+        AUTH_YANDEX_SECRET: ${{ secrets.ADMIN_AUTH_YANDEX_SECRET }}
+        EMAIL_SERVER_HOST: ${{ secrets.ADMIN_EMAIL_SERVER_HOST }}
+        EMAIL_SERVER_PORT: ${{ secrets.ADMIN_EMAIL_SERVER_PORT }}
+        EMAIL_SERVER_USER: ${{ secrets.ADMIN_EMAIL_SERVER_USER }}
+        EMAIL_SERVER_PASSWORD: ${{ secrets.ADMIN_EMAIL_SERVER_PASSWORD }}
+        EMAIL_FROM: ${{ secrets.ADMIN_EMAIL_FROM }}
+        GROQ_API_KEY: ${{ secrets.ADMIN_GROQ_API_KEY }}
+        GROQ_MODEL: ${{ secrets.ADMIN_GROQ_MODEL }}
+        AI_PROVIDER: ${{ secrets.ADMIN_AI_PROVIDER }}
+        PORT: ${{ secrets.ADMIN_PORT }}
+    
+    - name: 📦 Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r .next deploy/
+        cp -r public deploy/ || true
+        cp package.json deploy/
+        cp bun.lock deploy/ || cp yarn.lock deploy/ || cp package-lock.json deploy/ || true
+        cp -r prisma deploy/
+        cp ecosystem.admin.config.cjs deploy/
+        
+    - name: 📤 Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: admin-build
+        path: deploy/
+        retention-days: 1
+
+  deploy:
+    name: 🚀 Deploy to Production Server
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: admin-build
+        path: ./deploy
+    
+    - name: 🔑 Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.ADMIN_DEPLOY_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.ADMIN_DEPLOY_HOST }} >> ~/.ssh/known_hosts
+    
+    - name: 🚀 Deploy to server
+      run: |
+        # Создаем архив для передачи
+        cd deploy
+        tar -czf ../admin-deploy.tar.gz .
+        cd ..
+        
+        # Копируем на сервер
+        scp -o StrictHostKeyChecking=no admin-deploy.tar.gz ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }}:/tmp/
+        
+        # Выполняем развертывание на сервере
+        ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} << 'EOF'
+          set -e
+          
+          # Backup предыдущей версии
+          if [ -d "/var/www/admin.kirdro.ru" ]; then
+            sudo cp -r /var/www/admin.kirdro.ru /var/www/admin.kirdro.ru.backup.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
+          fi
+          
+          # Создаем директорию если не существует
+          sudo mkdir -p /var/www/admin.kirdro.ru
+          sudo chown -R $USER:$USER /var/www/admin.kirdro.ru
+          
+          # Очищаем старые файлы
+          cd /var/www/admin.kirdro.ru
+          rm -rf * .* 2>/dev/null || true
+          
+          # Распаковываем новую версию
+          tar -xzf /tmp/admin-deploy.tar.gz -C /var/www/admin.kirdro.ru/
+          
+          # Создаем .env файл с продакшн переменными
+          cat > /var/www/admin.kirdro.ru/.env << 'ENVEOF'
+        DATABASE_URL="${{ secrets.ADMIN_DATABASE_URL }}"
+        NEXTAUTH_SECRET="${{ secrets.ADMIN_NEXTAUTH_SECRET }}"
+        NEXTAUTH_URL="${{ secrets.ADMIN_NEXTAUTH_URL }}"
+        AUTH_SECRET="${{ secrets.ADMIN_AUTH_SECRET }}"
+        AUTH_TRUST_HOST="${{ secrets.ADMIN_AUTH_TRUST_HOST }}"
+        AUTH_YANDEX_ID="${{ secrets.ADMIN_AUTH_YANDEX_ID }}"
+        AUTH_YANDEX_SECRET="${{ secrets.ADMIN_AUTH_YANDEX_SECRET }}"
+        EMAIL_SERVER_HOST="${{ secrets.ADMIN_EMAIL_SERVER_HOST }}"
+        EMAIL_SERVER_PORT="${{ secrets.ADMIN_EMAIL_SERVER_PORT }}"
+        EMAIL_SERVER_USER="${{ secrets.ADMIN_EMAIL_SERVER_USER }}"
+        EMAIL_SERVER_PASSWORD="${{ secrets.ADMIN_EMAIL_SERVER_PASSWORD }}"
+        EMAIL_FROM="${{ secrets.ADMIN_EMAIL_FROM }}"
+        GROQ_API_KEY="${{ secrets.ADMIN_GROQ_API_KEY }}"
+        GROQ_MODEL="${{ secrets.ADMIN_GROQ_MODEL }}"
+        AI_PROVIDER="${{ secrets.ADMIN_AI_PROVIDER }}"
+        NODE_ENV=production
+        PORT=3004
+        ENVEOF
+          
+          # Устанавливаем зависимости
+          cd /var/www/admin.kirdro.ru
+          bun install --production
+          
+          # Генерируем Prisma клиент
+          bunx prisma generate
+          
+          # Настраиваем права
+          sudo chown -R $USER:$USER /var/www/admin.kirdro.ru
+          chmod 600 .env
+          
+          # Перезапускаем через PM2
+          pm2 reload admin-kirdro-portfolio || pm2 start ecosystem.admin.config.cjs
+          
+          # Ждем запуска приложения
+          sleep 10
+          
+          # Cleanup
+          rm -f /tmp/admin-deploy.tar.gz
+          
+          echo "✅ Деплой админ-панели завершен успешно!"
+        EOF
+
+  health-check:
+    name: 🩺 Health Check
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 🏥 Check API Health
+      run: |
+        echo "🔍 Проверяем health check API..."
+        
+        # Ждем полной загрузки приложения
+        sleep 15
+        
+        # Проверяем API health endpoint
+        for i in {1..5}; do
+          echo "Попытка $i/5..."
+          if curl -f -s "https://admin.kirdro.ru/api/health" > /tmp/health.json; then
+            echo "✅ Health check API работает!"
+            cat /tmp/health.json | jq '.'
+            break
+          else
+            echo "❌ Health check не отвечает, ждем 10 секунд..."
+            sleep 10
+          fi
+          
+          if [ $i -eq 5 ]; then
+            echo "🚨 Health check не прошел после 5 попыток!"
+            exit 1
+          fi
+        done
+    
+    - name: 🌐 Check Main Page
+      run: |
+        echo "🔍 Проверяем главную страницу..."
+        
+        # Проверяем главную страницу
+        if curl -f -s -I "https://admin.kirdro.ru/" | grep "200 OK"; then
+          echo "✅ Главная страница доступна!"
+        else
+          echo "❌ Главная страница недоступна!"
+          
+          # Диагностика при ошибке
+          echo "🔍 Диагностика на сервере:"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} << 'EOF'
+            echo "PM2 статус:"
+            pm2 status admin-kirdro-portfolio
+            echo "Логи PM2:"
+            pm2 logs admin-kirdro-portfolio --lines 20
+            echo "Проверка порта 3004:"
+            netstat -tlnp | grep :3004
+          EOF
+          
+          exit 1
+        fi
+    
+    - name: 🎉 Success Notification
+      run: |
+        echo "🎉 Деплой админ-панели admin.kirdro.ru успешно завершен!"
+        echo "🌐 Доступно по адресу: https://admin.kirdro.ru"
+        echo "🩺 Health Check: https://admin.kirdro.ru/api/health"
