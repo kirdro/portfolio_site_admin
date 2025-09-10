@@ -125,6 +125,27 @@ jobs:
         ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} << 'EOF'
           set -e
           
+          # Очистка старых бэкапов (оставляем только последние 2)
+          echo "Очищаем старые бэкапы..."
+          find /var/www -name "admin.kirdro.ru.backup.*" -type d | sort | head -n -2 | xargs -r sudo rm -rf
+          
+          # Очистка временных файлов и кеша
+          echo "Очищаем временные файлы..."
+          sudo rm -rf /tmp/* 2>/dev/null || true
+          sudo rm -rf /var/tmp/* 2>/dev/null || true
+          
+          # Очистка node_modules в других проектах если есть
+          echo "Очищаем node_modules в других проектах..."
+          find /var/www -name "node_modules" -type d ! -path "*/admin.kirdro.ru/*" | head -5 | xargs -r sudo rm -rf
+          
+          # Очистка логов старше 7 дней
+          echo "Очищаем старые логи..."
+          find /var/log -name "*.log" -mtime +7 -exec sudo rm {} \; 2>/dev/null || true
+          
+          # Проверяем свободное место
+          echo "Свободное место после очистки:"
+          df -h /
+          
           # Backup предыдущей версии
           if [ -d "/var/www/admin.kirdro.ru" ]; then
             sudo cp -r /var/www/admin.kirdro.ru /var/www/admin.kirdro.ru.backup.$(date +%Y%m%d_%H%M%S) 2>/dev/null || true
@@ -166,10 +187,15 @@ jobs:
         PORT=3004
         ENVEOF
           
-          # Устанавливаем зависимости с правильными правами
+          # Устанавливаем зависимости с правильными правами и оптимизацией
           cd /var/www/admin.kirdro.ru
           export HOME=/home/$USER
-          bun install --production
+          
+          # Очищаем кеш bun перед установкой
+          rm -rf ~/.cache/bun 2>/dev/null || true
+          
+          # Устанавливаем только продакшн зависимости без кеша
+          bun install --production --no-cache
           
           # Генерируем Prisma клиент
           export DATABASE_URL="${{ secrets.ADMIN_DATABASE_URL }}"
@@ -185,8 +211,16 @@ jobs:
           # Ждем запуска приложения
           sleep 10
           
-          # Cleanup
+          # Cleanup временных файлов
           rm -f /tmp/admin-deploy.tar.gz
+          
+          # Финальная очистка кеша npm/bun если есть
+          rm -rf ~/.cache/bun 2>/dev/null || true
+          rm -rf ~/.npm/_cacache 2>/dev/null || true
+          
+          # Проверяем финальное использование диска
+          echo "Финальное использование диска:"
+          df -h /
           
           echo "✅ Деплой админ-панели завершен успешно!"
         EOF
