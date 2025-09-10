@@ -56,7 +56,7 @@ jobs:
         DATABASE_URL: ${{ secrets.ADMIN_DATABASE_URL }}
     
     - name: 🏗 Build Next.js application
-      run: bun run build
+      run: bunx next build
       env:
         DATABASE_URL: ${{ secrets.ADMIN_DATABASE_URL }}
         NEXTAUTH_SECRET: ${{ secrets.ADMIN_NEXTAUTH_SECRET }}
@@ -134,12 +134,16 @@ jobs:
           sudo mkdir -p /var/www/admin.kirdro.ru
           sudo chown -R $USER:$USER /var/www/admin.kirdro.ru
           
-          # Очищаем старые файлы
+          # Переходим в директорию и очищаем старые файлы
           cd /var/www/admin.kirdro.ru
-          rm -rf * .* 2>/dev/null || true
+          find . -mindepth 1 -delete 2>/dev/null || true
           
           # Распаковываем новую версию
           tar -xzf /tmp/admin-deploy.tar.gz -C /var/www/admin.kirdro.ru/
+          
+          # Проверяем наличие файлов после распаковки
+          echo "Содержимое после распаковки:"
+          ls -la
           
           # Создаем .env файл с продакшн переменными
           cat > /var/www/admin.kirdro.ru/.env << 'ENVEOF'
@@ -162,11 +166,13 @@ jobs:
         PORT=3004
         ENVEOF
           
-          # Устанавливаем зависимости
+          # Устанавливаем зависимости с правильными правами
           cd /var/www/admin.kirdro.ru
+          export HOME=/home/$USER
           bun install --production
           
           # Генерируем Prisma клиент
+          export DATABASE_URL="${{ secrets.ADMIN_DATABASE_URL }}"
           bunx prisma generate
           
           # Настраиваем права
