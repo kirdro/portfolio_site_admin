@@ -77,12 +77,66 @@ jobs:
     - name: 📦 Create deployment package
       run: |
         mkdir -p deploy
-        cp -r .next deploy/
-        cp -r public deploy/ || true
-        cp package.json deploy/
-        cp bun.lock deploy/ || cp yarn.lock deploy/ || cp package-lock.json deploy/ || true
-        cp -r prisma deploy/
-        cp ecosystem.admin.config.cjs deploy/
+        
+        echo "Проверяем наличие файлов для деплоя:"
+        ls -la
+        
+        # Копируем обязательные файлы
+        if [ -d ".next" ]; then
+          cp -r .next deploy/
+          echo "✅ .next скопирован"
+        else
+          echo "❌ .next не найден!"
+          exit 1
+        fi
+        
+        if [ -d "public" ]; then
+          cp -r public deploy/
+          echo "✅ public скопирован"
+        else
+          echo "⚠️ public не найден, пропускаем"
+        fi
+        
+        if [ -f "package.json" ]; then
+          cp package.json deploy/
+          echo "✅ package.json скопирован"
+        else
+          echo "❌ package.json не найден!"
+          exit 1
+        fi
+        
+        # Копируем lockfile
+        if [ -f "bun.lock" ]; then
+          cp bun.lock deploy/
+          echo "✅ bun.lock скопирован"
+        elif [ -f "yarn.lock" ]; then
+          cp yarn.lock deploy/
+          echo "✅ yarn.lock скопирован"
+        elif [ -f "package-lock.json" ]; then
+          cp package-lock.json deploy/
+          echo "✅ package-lock.json скопирован"
+        else
+          echo "⚠️ Lockfile не найден"
+        fi
+        
+        if [ -d "prisma" ]; then
+          cp -r prisma deploy/
+          echo "✅ prisma скопирован"
+        else
+          echo "❌ prisma не найден!"
+          exit 1
+        fi
+        
+        if [ -f "ecosystem.admin.config.cjs" ]; then
+          cp ecosystem.admin.config.cjs deploy/
+          echo "✅ ecosystem.admin.config.cjs скопирован"
+        else
+          echo "❌ ecosystem.admin.config.cjs не найден!"
+          exit 1
+        fi
+        
+        echo "Финальное содержимое deploy:"
+        ls -la deploy/
         
     - name: 📤 Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -113,13 +167,30 @@ jobs:
     
     - name: 🚀 Deploy to server
       run: |
+        # Проверяем содержимое deploy директории
+        echo "Содержимое deploy директории:"
+        ls -la deploy/
+        
         # Создаем архив для передачи
         cd deploy
+        echo "Создаем архив..."
         tar -czf ../admin-deploy.tar.gz .
         cd ..
         
-        # Копируем на сервер
-        scp -o StrictHostKeyChecking=no admin-deploy.tar.gz ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }}:/tmp/
+        # Проверяем, что архив создался
+        if [ -f "admin-deploy.tar.gz" ]; then
+          echo "✅ Архив создан успешно, размер: $(du -h admin-deploy.tar.gz | cut -f1)"
+        else
+          echo "❌ Ошибка: архив не создан!"
+          exit 1
+        fi
+        
+        # Копируем на сервер с проверкой
+        echo "Копируем архив на сервер..."
+        scp -o StrictHostKeyChecking=no -v admin-deploy.tar.gz ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }}:/tmp/
+        
+        # Проверяем, что файл скопировался на сервер
+        ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} "ls -la /tmp/admin-deploy.tar.gz"
         
         # Выполняем развертывание на сервере
         ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} << 'EOF'
@@ -155,11 +226,20 @@ jobs:
           sudo mkdir -p /var/www/admin.kirdro.ru
           sudo chown -R $USER:$USER /var/www/admin.kirdro.ru
           
+          # Проверяем наличие архива на сервере
+          if [ ! -f "/tmp/admin-deploy.tar.gz" ]; then
+            echo "❌ Ошибка: архив /tmp/admin-deploy.tar.gz не найден на сервере!"
+            exit 1
+          fi
+          
+          echo "📦 Архив найден на сервере, размер: $(du -h /tmp/admin-deploy.tar.gz | cut -f1)"
+          
           # Переходим в директорию и очищаем старые файлы
           cd /var/www/admin.kirdro.ru
           find . -mindepth 1 -delete 2>/dev/null || true
           
           # Распаковываем новую версию
+          echo "📂 Распаковываем архив..."
           tar -xzf /tmp/admin-deploy.tar.gz -C /var/www/admin.kirdro.ru/
           
           # Проверяем наличие файлов после распаковки
