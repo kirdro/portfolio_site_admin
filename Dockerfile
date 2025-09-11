@@ -5,8 +5,8 @@ FROM oven/bun:1 AS deps
 WORKDIR /app
 
 # Копируем package.json и lockfile
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile --production=false
+COPY package.json bun.lock* ./
+RUN bun install --frozen-lockfile
 
 # Stage 2: Builder
 FROM oven/bun:1 AS builder
