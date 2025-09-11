@@ -172,7 +172,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   
-  // Настройки безопасности
+  // Настройки безопасности и cookies
   cookies: {
     sessionToken: {
       name: "next-auth.session-token",
@@ -181,6 +181,27 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
+        domain: process.env.NODE_ENV === "production" ? ".kirdro.ru" : undefined,
+      },
+    },
+    state: {
+      name: "next-auth.state",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 900, // 15 minutes
+      },
+    },
+    pkceCodeVerifier: {
+      name: "next-auth.pkce.code_verifier",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 900,
       },
     },
   },
