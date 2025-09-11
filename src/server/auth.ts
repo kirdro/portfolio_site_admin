@@ -47,6 +47,9 @@ export const authOptions: NextAuthOptions = {
   // ПОЛНОСТЬЮ убираем Prisma адаптер - используем только JWT
   // adapter: PrismaAdapter(prisma),
   
+  // Временно отключаем CSRF для диагностики
+  debug: true,
+  
   // Настройки сессии
   session: {
     strategy: "jwt",
@@ -172,7 +175,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   
-  // Настройки безопасности и cookies
+  // Упрощенные настройки cookies для диагностики
   cookies: {
     sessionToken: {
       name: "next-auth.session-token",
@@ -180,31 +183,13 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" ? ".kirdro.ru" : undefined,
-      },
-    },
-    state: {
-      name: "next-auth.state",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 900, // 15 minutes
-      },
-    },
-    pkceCodeVerifier: {
-      name: "next-auth.pkce.code_verifier",
-      options: {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 900,
+        secure: false, // ВРЕМЕННО отключаем для диагностики
       },
     },
   },
+  
+  // Отключаем использование state для диагностики
+  useSecureCookies: false,
   
   // Секретный ключ
   secret: process.env.NEXTAUTH_SECRET,
