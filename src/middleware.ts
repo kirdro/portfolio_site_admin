@@ -3,8 +3,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  // Получаем токен из JWT
-  const token = await getToken({ req: request });
+  // Получаем токен из JWT с правильным именем cookie
+  const token = await getToken({ 
+    req: request,
+    cookieName: "next-auth.session-token",
+    secret: process.env.NEXTAUTH_SECRET 
+  });
   
   // Исключаем определенные пути от проверки
   const isPublicPath = 
