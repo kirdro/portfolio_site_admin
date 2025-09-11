@@ -14,11 +14,12 @@ export const db = prisma; // Экспорт для совместимости с
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// Yandex OAuth провайдер (кастомная реализация) с подробным логированием
+// Yandex OAuth провайдер (кастомная реализация) с исправленной обработкой токенов
 const YandexProvider = {
   id: "yandex",
   name: "Yandex",
   type: "oauth" as const,
+  version: "2.0",
   authorization: {
     url: "https://oauth.yandex.ru/authorize",
     params: {
@@ -26,19 +27,64 @@ const YandexProvider = {
       response_type: "code",
     },
   },
-  token: "https://oauth.yandex.ru/token",
-  userinfo: "https://login.yandex.ru/info?format=json",
+  token: {
+    url: "https://oauth.yandex.ru/token",
+    async request({ client, params, checks, provider }) {
+      console.log("🎫 Запрос токена к Яндексу с параметрами:", params);
+      
+      const response = await fetch(provider.token.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Accept": "application/json",
+        },
+        body: new URLSearchParams({
+          grant_type: "authorization_code",
+          client_id: provider.clientId,
+          client_secret: provider.clientSecret,
+          code: params.code,
+          redirect_uri: params.redirect_uri,
+        }),
+      });
+
+      const tokens = await response.json();
+      console.log("🔑 Получены токены от Яндекса:", tokens);
+      
+      if (!response.ok) {
+        throw new Error(`OAuth token error: ${JSON.stringify(tokens)}`);
+      }
+
+      return { tokens };
+    },
+  },
+  userinfo: {
+    url: "https://login.yandex.ru/info?format=json",
+    async request({ tokens, provider }) {
+      console.log("👤 Запрос информации о пользователе с токеном:", tokens.access_token);
+      
+      const response = await fetch(provider.userinfo.url, {
+        headers: {
+          Authorization: `OAuth ${tokens.access_token}`,
+        },
+      });
+
+      const profile = await response.json();
+      console.log("🔍 Получен профиль пользователя:", profile);
+      
+      return profile;
+    },
+  },
   clientId: process.env.AUTH_YANDEX_ID!,
   clientSecret: process.env.AUTH_YANDEX_SECRET!,
   profile(profile: any) {
-    console.log("🔍 Yandex profile received:", JSON.stringify(profile, null, 2));
+    console.log("✨ Обработка профиля:", JSON.stringify(profile, null, 2));
     const result = {
       id: profile.id,
       name: profile.display_name || profile.real_name,
       email: profile.default_email,
       image: profile.is_avatar_empty ? null : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200`,
     };
-    console.log("✨ Processed profile:", JSON.stringify(result, null, 2));
+    console.log("🎭 Финальный профиль:", JSON.stringify(result, null, 2));
     return result;
   },
 };
