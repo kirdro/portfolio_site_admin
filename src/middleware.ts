@@ -9,6 +9,7 @@ export async function middleware(request: NextRequest) {
   // Исключаем определенные пути от проверки
   const isPublicPath = 
     request.nextUrl.pathname.startsWith('/api/auth') ||
+    request.nextUrl.pathname.startsWith('/api/health') ||
     request.nextUrl.pathname.startsWith('/auth') ||
     request.nextUrl.pathname.startsWith('/_next') ||
     request.nextUrl.pathname === '/favicon.ico';
