@@ -51,9 +51,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 
-# Копируем Prisma схему и клиент
+# Копируем Prisma схему и сгенерированный клиент
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/src/generated ./src/generated
 
 USER nextjs
 
