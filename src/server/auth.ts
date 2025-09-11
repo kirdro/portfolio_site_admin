@@ -29,7 +29,7 @@ const YandexProvider = {
   },
   token: {
     url: "https://oauth.yandex.ru/token",
-    async request({ client, params, checks, provider }) {
+    async request({ client, params, checks, provider }: any) {
       console.log("🎫 Запрос токена к Яндексу с параметрами:", params);
       
       const response = await fetch(provider.token.url, {
@@ -59,7 +59,7 @@ const YandexProvider = {
   },
   userinfo: {
     url: "https://login.yandex.ru/info?format=json",
-    async request({ tokens, provider }) {
+    async request({ tokens, provider }: any) {
       console.log("👤 Запрос информации о пользователе с токеном:", tokens.access_token);
       
       const response = await fetch(provider.userinfo.url, {
