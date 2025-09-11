@@ -167,7 +167,7 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
   },
   
-  // Упрощенные настройки cookies для диагностики
+  // Исправленные настройки cookies для работы с HTTPS
   cookies: {
     sessionToken: {
       name: "next-auth.session-token",
@@ -175,13 +175,41 @@ export const authOptions: NextAuthOptions = {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: false, // ВРЕМЕННО отключаем для диагностики
+        secure: true, // Включаем для HTTPS
+      },
+    },
+    callbackUrl: {
+      name: "next-auth.callback-url", 
+      options: {
+        httpOnly: false,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+      },
+    },
+    csrfToken: {
+      name: "next-auth.csrf-token",
+      options: {
+        httpOnly: false,
+        sameSite: "lax", 
+        path: "/",
+        secure: true,
+      },
+    },
+    state: {
+      name: "next-auth.state",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: true,
+        maxAge: 900, // 15 минут для OAuth state
       },
     },
   },
   
-  // Отключаем использование state для диагностики
-  useSecureCookies: false,
+  // Включаем secure cookies для HTTPS
+  useSecureCookies: true,
   
   // Секретный ключ
   secret: process.env.NEXTAUTH_SECRET,
