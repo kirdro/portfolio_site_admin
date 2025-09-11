@@ -14,78 +14,24 @@ export const db = prisma; // Экспорт для совместимости с
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
-// Yandex OAuth провайдер (кастомная реализация) с исправленной обработкой токенов
+// Упрощённый Yandex OAuth провайдер - игнорируем время жизни кода
 const YandexProvider = {
   id: "yandex",
-  name: "Yandex",
+  name: "Yandex", 
   type: "oauth" as const,
-  version: "2.0",
-  authorization: {
-    url: "https://oauth.yandex.ru/authorize",
-    params: {
-      scope: "login:email login:info",
-      response_type: "code",
-    },
-  },
-  token: {
-    url: "https://oauth.yandex.ru/token",
-    async request({ client, params, checks, provider }: any) {
-      console.log("🎫 Запрос токена к Яндексу с параметрами:", params);
-      
-      const response = await fetch(provider.token.url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "Accept": "application/json",
-        },
-        body: new URLSearchParams({
-          grant_type: "authorization_code",
-          client_id: provider.clientId,
-          client_secret: provider.clientSecret,
-          code: params.code,
-          redirect_uri: params.redirect_uri,
-        }),
-      });
-
-      const tokens = await response.json();
-      console.log("🔑 Получены токены от Яндекса:", tokens);
-      
-      if (!response.ok) {
-        throw new Error(`OAuth token error: ${JSON.stringify(tokens)}`);
-      }
-
-      return { tokens };
-    },
-  },
-  userinfo: {
-    url: "https://login.yandex.ru/info?format=json",
-    async request({ tokens, provider }: any) {
-      console.log("👤 Запрос информации о пользователе с токеном:", tokens.access_token);
-      
-      const response = await fetch(provider.userinfo.url, {
-        headers: {
-          Authorization: `OAuth ${tokens.access_token}`,
-        },
-      });
-
-      const profile = await response.json();
-      console.log("🔍 Получен профиль пользователя:", profile);
-      
-      return profile;
-    },
-  },
+  authorization: "https://oauth.yandex.ru/authorize?scope=login:email login:info",
+  token: "https://oauth.yandex.ru/token",
+  userinfo: "https://login.yandex.ru/info?format=json",
   clientId: process.env.AUTH_YANDEX_ID!,
   clientSecret: process.env.AUTH_YANDEX_SECRET!,
   profile(profile: any) {
-    console.log("✨ Обработка профиля:", JSON.stringify(profile, null, 2));
-    const result = {
+    console.log("🎭 Простая обработка Yandex профиля:", profile);
+    return {
       id: profile.id,
       name: profile.display_name || profile.real_name,
       email: profile.default_email,
       image: profile.is_avatar_empty ? null : `https://avatars.yandex.net/get-yapic/${profile.default_avatar_id}/islands-200`,
     };
-    console.log("🎭 Финальный профиль:", JSON.stringify(result, null, 2));
-    return result;
   },
 };
 
@@ -93,17 +39,17 @@ export const authOptions: NextAuthOptions = {
   // ПОЛНОСТЬЮ убираем Prisma адаптер - используем только JWT
   // adapter: PrismaAdapter(prisma),
   
-  // Временно отключаем CSRF для диагностики
+  // Отключаем проверки для решения проблем с OAuth
   debug: true,
+  
+  // Упрощённые настройки JWT без кастомной обработки
+  jwt: {
+    maxAge: 24 * 60 * 60, // 24 часа
+  },
   
   // Настройки сессии
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24 часа
-  },
-  
-  // Настройки JWT
-  jwt: {
     maxAge: 24 * 60 * 60, // 24 часа
   },
   
