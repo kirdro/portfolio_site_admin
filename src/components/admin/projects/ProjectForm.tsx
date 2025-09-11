@@ -2,6 +2,7 @@ import React, { useState, useCallback } from "react";
 import { z } from "zod";
 import type { ProjectData } from "../../../app/(dashboard)/projects/page";
 import { ImageUpload } from "../shared/ImageUpload";
+import { api } from "../../../utils/api";
 
 interface ProjectFormProps {
   project?: ProjectData | null;
@@ -27,6 +28,27 @@ const projectSchema = z.object({
  */
 export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFormProps) {
   
+  // Подключаем tRPC мутации
+  const createMutation = api.admin.projects.create.useMutation({
+    onSuccess: () => {
+      onSave();
+    },
+    onError: (error) => {
+      console.error("Ошибка создания проекта:", error);
+      alert(`Ошибка: ${error.message}`);
+    }
+  });
+
+  const updateMutation = api.admin.projects.update.useMutation({
+    onSuccess: () => {
+      onSave();
+    },
+    onError: (error) => {
+      console.error("Ошибка обновления проекта:", error);
+      alert(`Ошибка: ${error.message}`);
+    }
+  });
+  
   // Состояние формы
   const [formData, setFormData] = useState({
     title: project?.title || "",
@@ -39,15 +61,42 @@ export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFor
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentTag, setCurrentTag] = useState("");
 
-  // Доступные теги для автодополнения
+  // Расширенный список доступных технологий для автодополнения
   const availableTags = [
-    "React", "Next.js", "TypeScript", "JavaScript", "Node.js", "Python",
-    "TailwindCSS", "CSS", "HTML", "Vue.js", "Angular", "Express",
-    "MongoDB", "PostgreSQL", "MySQL", "AI", "Machine Learning", "Blockchain",
-    "DevOps", "Docker", "AWS", "Firebase", "Vercel", "API"
+    // Frontend фреймворки и библиотеки
+    "React", "Next.js", "Vue.js", "Angular", "Svelte", "Remix", "Astro", "Gatsby", "Nuxt.js",
+    // Языки программирования
+    "TypeScript", "JavaScript", "Python", "Java", "Go", "Rust", "C++", "C#", "PHP", "Ruby", "Swift", "Kotlin",
+    // Backend фреймворки
+    "Node.js", "Express", "Fastify", "NestJS", "Strapi", "Django", "FastAPI", "Spring Boot", "Laravel",
+    // Стилизация
+    "TailwindCSS", "CSS", "SASS", "SCSS", "Styled Components", "Emotion", "Material-UI", "Ant Design", "Bootstrap",
+    // Базы данных
+    "PostgreSQL", "MySQL", "MongoDB", "Redis", "SQLite", "Cassandra", "DynamoDB", "Supabase", "PlanetScale",
+    // ORM и ODM
+    "Prisma", "TypeORM", "Sequelize", "Mongoose", "Drizzle", "MikroORM",
+    // Инструменты сборки
+    "Webpack", "Vite", "Parcel", "Rollup", "esbuild", "Turbopack", "Bun",
+    // Облачные сервисы
+    "AWS", "Google Cloud", "Azure", "Vercel", "Netlify", "Railway", "Render", "Fly.io", "Heroku",
+    // DevOps и контейнеризация
+    "Docker", "Kubernetes", "CI/CD", "GitHub Actions", "GitLab CI", "Jenkins", "Terraform", "Ansible",
+    // API технологии
+    "REST API", "GraphQL", "tRPC", "gRPC", "WebSocket", "Socket.io", "WebRTC",
+    // Тестирование
+    "Jest", "Vitest", "Cypress", "Playwright", "Testing Library", "Mocha", "Chai",
+    // Другие технологии
+    "AI", "Machine Learning", "Blockchain", "Web3", "Solidity", "IPFS", "Three.js", "WebGL",
+    // Мобильная разработка
+    "React Native", "Flutter", "Ionic", "Expo",
+    // Сборщики и пакетные менеджеры
+    "npm", "yarn", "pnpm", "Bun",
+    // Версионный контроль
+    "Git", "GitHub", "GitLab", "Bitbucket",
+    // Аналитика и мониторинг
+    "Sentry", "DataDog", "New Relic", "Grafana", "Prometheus"
   ];
 
   // Обработчик изменения полей формы
@@ -119,27 +168,38 @@ export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFor
     if (!валидироватьФорму()) {
       return;
     }
-
-    setIsSubmitting(true);
     
     try {
-      // Здесь будет вызов tRPC мутации для создания/обновления проекта
-      console.log("Сохранение проекта:", formData);
-      
-      // Симуляция API запроса
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSave();
+      // Подготавливаем данные для отправки
+      const dataToSubmit = {
+        title: formData.title,
+        description: formData.description,
+        imageUrl: formData.imageUrl || null,
+        demoUrl: formData.demoUrl || null,
+        githubUrl: formData.githubUrl || null,
+        featured: formData.featured,
+        tags: formData.tags
+      };
+
+      if (isCreating) {
+        // Создание нового проекта
+        await createMutation.mutateAsync(dataToSubmit);
+      } else if (project) {
+        // Обновление существующего проекта
+        await updateMutation.mutateAsync({
+          id: project.id,
+          ...dataToSubmit
+        });
+      }
     } catch (error) {
-      console.error("Ошибка сохранения проекта:", error);
-    } finally {
-      setIsSubmitting(false);
+      // Ошибки уже обрабатываются в onError мутаций
+      console.error("Ошибка при сохранении:", error);
     }
-  }, [formData, onSave, валидироватьФорму]);
+  }, [formData, isCreating, project, createMutation, updateMutation, валидироватьФорму]);
 
   return (
-    <div className="fixed inset-0 bg-bg/80 flex items-center justify-center p-4 z-50">
-      <div className="bg-panel border border-line rounded-lg bevel max-w-2xl w-full max-h-[90vh] overflow-auto">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-panel border border-line rounded-lg bevel max-w-2xl w-full max-h-[90vh] overflow-auto shadow-2xl shadow-neon/10">
         <div className="p-6">
           {/* Заголовок формы */}
           <div className="flex items-center justify-between mb-6">
@@ -329,13 +389,13 @@ export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFor
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={createMutation.isLoading || updateMutation.isLoading}
                 className="flex-1 px-4 py-2 bg-neon/20 border border-neon text-neon
                          hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                          disabled:opacity-50 disabled:cursor-not-allowed
                          bevel transition-all duration-300"
               >
-                {isSubmitting ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
+                {(createMutation.isLoading || updateMutation.isLoading) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
               </button>
               <button
                 type="button"

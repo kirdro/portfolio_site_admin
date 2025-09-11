@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from "react";
 import { z } from "zod";
 import type { SkillData } from "../../../app/(dashboard)/skills/page";
+import { api } from "../../../utils/api";
 
 interface SkillFormProps {
   skill?: SkillData | null;
@@ -27,6 +28,27 @@ const skillSchema = z.object({
  */
 export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps) {
   
+  // Подключаем tRPC мутации
+  const createMutation = api.admin.skills.create.useMutation({
+    onSuccess: () => {
+      onSave();
+    },
+    onError: (error) => {
+      console.error("Ошибка создания навыка:", error);
+      alert(`Ошибка: ${error.message}`);
+    }
+  });
+
+  const updateMutation = api.admin.skills.update.useMutation({
+    onSuccess: () => {
+      onSave();
+    },
+    onError: (error) => {
+      console.error("Ошибка обновления навыка:", error);
+      alert(`Ошибка: ${error.message}`);
+    }
+  });
+  
   // Состояние формы
   const [formData, setFormData] = useState({
     name: skill?.name || "",
@@ -36,7 +58,6 @@ export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Доступные категории
   const категории = [
@@ -98,23 +119,23 @@ export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps
     if (!валидироватьФорму()) {
       return;
     }
-
-    setIsSubmitting(true);
     
     try {
-      // Здесь будет вызов tRPC мутации для создания/обновления навыка
-      console.log("Сохранение навыка:", formData);
-      
-      // Симуляция API запроса
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSave();
+      if (isCreating) {
+        // Создание нового навыка
+        await createMutation.mutateAsync(formData);
+      } else if (skill) {
+        // Обновление существующего навыка
+        await updateMutation.mutateAsync({
+          id: skill.id,
+          ...formData
+        });
+      }
     } catch (error) {
-      console.error("Ошибка сохранения навыка:", error);
-    } finally {
-      setIsSubmitting(false);
+      // Ошибки уже обрабатываются в onError мутаций
+      console.error("Ошибка при сохранении:", error);
     }
-  }, [formData, onSave, валидироватьФорму]);
+  }, [formData, isCreating, skill, createMutation, updateMutation, валидироватьФорму]);
 
   // Определение цвета уровня
   const определитьЦветУровня = (level: number) => {
@@ -125,8 +146,8 @@ export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps
   };
 
   return (
-    <div className="fixed inset-0 bg-bg/80 flex items-center justify-center p-4 z-50">
-      <div className="bg-panel border border-line rounded-lg bevel max-w-2xl w-full max-h-[90vh] overflow-auto">
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div className="bg-panel border border-line rounded-lg bevel max-w-2xl w-full max-h-[90vh] overflow-auto shadow-2xl shadow-neon/10">
         <div className="p-6">
           {/* Заголовок формы */}
           <div className="flex items-center justify-between mb-6">
@@ -269,13 +290,13 @@ export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={createMutation.isLoading || updateMutation.isLoading}
                 className="flex-1 px-4 py-2 bg-neon/20 border border-neon text-neon
                          hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                          disabled:opacity-50 disabled:cursor-not-allowed
                          bevel transition-all duration-300"
               >
-                {isSubmitting ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
+                {(createMutation.isLoading || updateMutation.isLoading) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
               </button>
               <button
                 type="button"

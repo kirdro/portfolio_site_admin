@@ -86,25 +86,25 @@ export default function ChatPage() {
   const mockGeneralMessages: ChatMessageData[] = (generalMessages?.messages || []).map((msg: any) => ({
     id: msg.id,
     content: msg.content,
-    userId: msg.User?.id || msg.userId,
-    userName: msg.User?.name || "Неизвестный пользователь",
-    userAvatar: msg.User?.image || `https://i.pravatar.cc/40?u=${msg.userId}`,
+    userId: msg.userId,
+    userName: msg.userName || "Неизвестный пользователь",
+    userAvatar: msg.userAvatar || `https://i.pravatar.cc/40?u=${msg.userId}`,
     type: "general" as const,
     createdAt: msg.createdAt,
     updatedAt: msg.updatedAt,
-    isBlocked: false,
+    isBlocked: msg.isBlocked || false,
   }));
 
   const mockAiMessages: ChatMessageData[] = (aiMessages?.messages || []).map((msg: any) => ({
     id: msg.id,
     content: msg.content,
-    userId: msg.User?.id || msg.userId,
-    userName: msg.User?.name || "Неизвестный пользователь",
-    userAvatar: msg.User?.image || `https://i.pravatar.cc/40?u=${msg.userId}`,
+    userId: msg.userId,
+    userName: msg.userName || "Неизвестный пользователь",
+    userAvatar: msg.userAvatar || `https://i.pravatar.cc/40?u=${msg.userId}`,
     type: "ai" as const,
     createdAt: msg.createdAt,
     updatedAt: msg.updatedAt,
-    isBlocked: false,
+    isBlocked: msg.isBlocked || false,
   }));
 
   // Обработчик переключения вкладок
