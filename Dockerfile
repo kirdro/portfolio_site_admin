@@ -24,17 +24,11 @@ RUN bunx prisma generate
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Build args для переменных окружения
-ARG GROQ_API_KEY=""
-ARG DATABASE_URL=""
-ARG NEXTAUTH_SECRET="build-temp-secret"
-ARG NEXTAUTH_URL="http://localhost:3005"
-
-# Устанавливаем переменные окружения для сборки
-ENV GROQ_API_KEY=$GROQ_API_KEY
-ENV DATABASE_URL=$DATABASE_URL
-ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
+# Временные переменные для сборки (переопределяются в runtime)
+ENV GROQ_API_KEY=""
+ENV DATABASE_URL="postgresql://temp:temp@localhost:5432/temp"
+ENV NEXTAUTH_SECRET="build-temp-secret-must-be-32-chars-long"
+ENV NEXTAUTH_URL="http://localhost:3005"
 
 RUN bun run build
 
