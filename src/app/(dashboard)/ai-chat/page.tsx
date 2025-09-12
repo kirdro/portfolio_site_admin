@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { AiChatInterface } from "../../../components/admin/ai-chat/AiChatInterface";
 import { AiChatHistory } from "../../../components/admin/ai-chat/AiChatHistory";
@@ -23,7 +22,6 @@ export default function AiChatPage() {
   }, []);
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
       {/* Заголовок и статистика */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
@@ -100,6 +98,5 @@ export default function AiChatPage() {
         {активнаяВкладка === "settings" && <AiChatSettings />}
       </div>
       </div>
-    </AdminLayout>
   );
 }

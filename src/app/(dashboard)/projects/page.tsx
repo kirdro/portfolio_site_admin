@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { ProjectsGrid } from "../../../components/admin/projects/ProjectsGrid";
 import { ProjectForm } from "../../../components/admin/projects/ProjectForm";
@@ -63,7 +62,6 @@ export default function ProjectsPage() {
   }, [обновитьПроекты]);
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
@@ -144,6 +142,5 @@ export default function ProjectsPage() {
           onSave={обработчикСохраненияПроекта}
         />
       </div>
-    </AdminLayout>
   );
 }

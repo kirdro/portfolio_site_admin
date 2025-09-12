@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { UsersTable, type UserTableData } from "../../../components/admin/users/UsersTable";
 import { UserForm } from "../../../components/admin/users/UserForm";
@@ -65,7 +64,6 @@ export default function UsersPage() {
   }, []);
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
       {/* Заголовок страницы */}
       <div className="flex items-center justify-between">
@@ -197,6 +195,5 @@ export default function UsersPage() {
         />
       )}
       </div>
-    </AdminLayout>
   );
 }

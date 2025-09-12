@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { SkillsGrid } from "../../../components/admin/skills/SkillsGrid";
 import { SkillForm } from "../../../components/admin/skills/SkillForm";
@@ -149,8 +148,7 @@ export default function SkillsPage() {
 
 
   return (
-    <AdminLayout>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
           <div>
@@ -260,7 +258,6 @@ export default function SkillsPage() {
             onSave={обработчикСохраненияНавыка}
           />
         )}
-      </div>
-    </AdminLayout>
+    </div>
   );
 }

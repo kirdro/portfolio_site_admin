@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { ContactsList } from "../../../components/admin/contacts/ContactsList";
 import { ContactDetail } from "../../../components/admin/contacts/ContactDetail";
@@ -110,7 +109,6 @@ export default function ContactsPage() {
   };
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
@@ -222,6 +220,5 @@ export default function ContactsPage() {
           />
         )}
       </div>
-    </AdminLayout>
   );
 }

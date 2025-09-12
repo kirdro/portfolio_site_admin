@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { api } from "../../../utils/api";
 import { ChatMessages } from "../../../components/admin/chat/ChatMessages";
 import { ChatStats } from "../../../components/admin/chat/ChatStats";
@@ -132,7 +131,6 @@ export default function ChatPage() {
   }, []);
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
@@ -264,6 +262,5 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

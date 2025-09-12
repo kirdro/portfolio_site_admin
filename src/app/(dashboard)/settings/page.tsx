@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import AdminLayout from "../../../components/AdminLayout";
 import { SystemSettings } from "../../../components/admin/settings/SystemSettings";
 import { DatabaseStatus } from "../../../components/admin/settings/DatabaseStatus";
 import { SecuritySettings } from "../../../components/admin/settings/SecuritySettings";
@@ -118,7 +117,6 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
@@ -313,6 +311,5 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }
