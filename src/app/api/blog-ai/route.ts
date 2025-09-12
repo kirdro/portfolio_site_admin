@@ -3,9 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "~/server/auth";
 import Groq from "groq-sdk";
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
+// Проверяем наличие GROQ_API_KEY
+const GROQ_API_KEY = process.env.GROQ_API_KEY;
+
+const groq = GROQ_API_KEY ? new Groq({
+  apiKey: GROQ_API_KEY,
+}) : null;
 
 interface AIRequest {
   action: "complete" | "improve" | "summarize" | "translate";
@@ -16,6 +19,14 @@ interface AIRequest {
 
 export async function POST(request: NextRequest) {
   try {
+    // Проверяем наличие Groq API
+    if (!groq) {
+      return NextResponse.json(
+        { error: "AI функции временно недоступны - не настроен GROQ_API_KEY" },
+        { status: 503 }
+      );
+    }
+
     // Проверяем аутентификацию
     const session = await getServerSession(authOptions);
     if (!session?.user) {
