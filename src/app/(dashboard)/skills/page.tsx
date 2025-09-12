@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { api } from "../../../utils/api";
 import { SkillsGrid } from "../../../components/admin/skills/SkillsGrid";
 import { SkillForm } from "../../../components/admin/skills/SkillForm";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaBolt, FaPlus, FaChartBar, FaTrophy, FaBullseye } from "react-icons/fa";
 
 // Типы данных для навыков
 export interface SkillData {
@@ -152,8 +154,9 @@ export default function SkillsPage() {
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neon glyph-glow">
-              ⚡ Управление навыками
+            <h1 className="text-2xl font-bold text-neon glyph-glow flex items-center gap-2">
+              <NeonIcon Icon={FaBolt} size={24} variant="intense" />
+              Управление навыками
             </h1>
             <p className="text-soft text-sm mt-1">
               Создание и редактирование навыков портфолио
@@ -171,7 +174,7 @@ export default function SkillsPage() {
                 </div>
                 <div className="text-sm text-soft">Всего навыков</div>
               </div>
-              <div className="text-2xl text-neon">⚡</div>
+              <NeonIcon Icon={FaBolt} size={32} variant="intense" className="stats-icon" />
             </div>
           </div>
 
@@ -183,7 +186,7 @@ export default function SkillsPage() {
                 </div>
                 <div className="text-sm text-soft">Средний уровень</div>
               </div>
-              <div className="text-2xl text-cyan">📊</div>
+              <NeonIcon Icon={FaChartBar} size={32} variant="cyan" className="stats-icon" />
             </div>
           </div>
 
@@ -195,7 +198,7 @@ export default function SkillsPage() {
                 </div>
                 <div className="text-sm text-soft">Экспертные (90%+)</div>
               </div>
-              <div className="text-2xl text-purple-400">🏆</div>
+              <NeonIcon Icon={FaTrophy} size={32} variant="purple" className="stats-icon" />
             </div>
           </div>
 
@@ -209,7 +212,7 @@ export default function SkillsPage() {
                 </div>
                 <div className="text-sm text-soft">Категорий</div>
               </div>
-              <div className="text-2xl text-yellow-400">🎯</div>
+              <NeonIcon Icon={FaBullseye} size={32} variant="orange" className="stats-icon" />
             </div>
           </div>
         </div>
@@ -237,7 +240,8 @@ export default function SkillsPage() {
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                      bevel transition-all duration-300"
           >
-            ➕ Добавить навык
+            <NeonIcon Icon={FaPlus} size={16} variant="default" />
+            Добавить навык
           </button>
         </div>
 

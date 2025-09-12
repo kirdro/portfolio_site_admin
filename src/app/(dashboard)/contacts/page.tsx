@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { api } from "../../../utils/api";
 import { ContactsList } from "../../../components/admin/contacts/ContactsList";
 import { ContactDetail } from "../../../components/admin/contacts/ContactDetail";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaEnvelope, FaBell, FaCog, FaCheck, FaExclamationTriangle } from "react-icons/fa";
 
 // Типы данных для контактных обращений (обновленные под реальную схему БД)
 export interface ContactData {
@@ -114,7 +116,8 @@ export default function ContactsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-neon glyph-glow">
-              📧 Контактные обращения
+              <NeonIcon Icon={FaEnvelope} size={20} variant="intense" />
+              Контактные обращения
             </h1>
             <p className="text-soft text-sm mt-1">
               Управление и ответы на обращения с сайта
@@ -132,7 +135,7 @@ export default function ContactsPage() {
                 </div>
                 <div className="text-sm text-soft">Всего обращений</div>
               </div>
-              <div className="text-2xl text-neon">📧</div>
+              <NeonIcon Icon={FaEnvelope} size={32} variant="intense" className="stats-icon" />
             </div>
           </div>
 
@@ -144,7 +147,7 @@ export default function ContactsPage() {
                 </div>
                 <div className="text-sm text-soft">Новые</div>
               </div>
-              <div className="text-2xl text-yellow-400">🔔</div>
+              <NeonIcon Icon={FaBell} size={32} variant="orange" className="stats-icon" />
             </div>
           </div>
 
@@ -156,7 +159,7 @@ export default function ContactsPage() {
                 </div>
                 <div className="text-sm text-soft">В работе</div>
               </div>
-              <div className="text-2xl text-cyan">⚙️</div>
+              <NeonIcon Icon={FaCog} size={32} variant="cyan" className="stats-icon" />
             </div>
           </div>
 
@@ -168,7 +171,7 @@ export default function ContactsPage() {
                 </div>
                 <div className="text-sm text-soft">Завершенные</div>
               </div>
-              <div className="text-2xl text-green-400">✅</div>
+              <NeonIcon Icon={FaCheck} size={32} variant="default" className="stats-icon" />
             </div>
           </div>
 
@@ -180,7 +183,7 @@ export default function ContactsPage() {
                 </div>
                 <div className="text-sm text-soft">Срочные</div>
               </div>
-              <div className="text-2xl text-red-400">🚨</div>
+              <NeonIcon Icon={FaExclamationTriangle} size={32} variant="red" className="stats-icon" />
             </div>
           </div>
         </div>

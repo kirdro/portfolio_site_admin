@@ -2,6 +2,8 @@
 
 import { signOut } from "next-auth/react";
 import { useCallback } from "react";
+import { NeonIcon } from "./ui/NeonIcon";
+import { FaBars, FaUser, FaCog, FaGlobe, FaSignOutAlt } from "react-icons/fa";
 
 interface AdminHeaderProps {
   user: {
@@ -29,9 +31,13 @@ export default function AdminHeader({ user, onSidebarToggle, sidebarOpen }: Admi
             <button
               onClick={onSidebarToggle}
               className="lg:hidden p-2 rounded-lg hover:bg-green-500/20 transition-colors"
-              style={{color: '#00FF99'}}
             >
-              ☰
+              <NeonIcon 
+                Icon={FaBars}
+                size={18}
+                variant="default"
+                title="Переключить меню"
+              />
             </button>
             
             <div>
@@ -69,7 +75,11 @@ export default function AdminHeader({ user, onSidebarToggle, sidebarOpen }: Admi
                     className="w-8 h-8 rounded-full"
                   />
                 ) : (
-                  <span className="text-lg">👤</span>
+                  <NeonIcon 
+                    Icon={FaUser}
+                    size={20}
+                    variant="subtle"
+                  />
                 )}
               </div>
 
@@ -90,9 +100,13 @@ export default function AdminHeader({ user, onSidebarToggle, sidebarOpen }: Admi
               <div className="relative group">
                 <button 
                   className="p-2 rounded-lg hover:bg-green-500/20 transition-colors"
-                  style={{color: '#00FF99'}}
                 >
-                  ⚙️
+                  <NeonIcon 
+                    Icon={FaCog}
+                    size={16}
+                    variant="default"
+                    title="Меню действий"
+                  />
                 </button>
                 
                 {/* Выпадающее меню */}
@@ -100,16 +114,18 @@ export default function AdminHeader({ user, onSidebarToggle, sidebarOpen }: Admi
                   <div className="cyber-card bg-black/90 border border-green-500/30 rounded-lg shadow-neon p-2">
                     <button
                       onClick={() => window.open('https://kirdro.ru', '_blank')}
-                      className="w-full text-left px-3 py-2 text-sm font-mono hover:bg-green-500/20 rounded transition-colors"
+                      className="w-full text-left px-3 py-2 text-sm font-mono hover:bg-green-500/20 rounded transition-colors flex items-center gap-2"
                       style={{color: '#B8C5C0'}}
                     >
-                      🌐 Открыть сайт
+                      <NeonIcon Icon={FaGlobe} size={14} variant="cyan" />
+                      Открыть сайт
                     </button>
                     <button
                       onClick={handleSignOut}
-                      className="w-full text-left px-3 py-2 text-sm font-mono hover:bg-red-500/20 rounded transition-colors text-red-400"
+                      className="w-full text-left px-3 py-2 text-sm font-mono hover:bg-red-500/20 rounded transition-colors text-red-400 flex items-center gap-2"
                     >
-                      🚪 Выход
+                      <NeonIcon Icon={FaSignOutAlt} size={14} variant="red" />
+                      Выход
                     </button>
                   </div>
                 </div>

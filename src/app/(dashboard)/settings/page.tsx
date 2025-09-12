@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { SystemSettings } from "../../../components/admin/settings/SystemSettings";
 import { DatabaseStatus } from "../../../components/admin/settings/DatabaseStatus";
 import { SecuritySettings } from "../../../components/admin/settings/SecuritySettings";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaCog, FaServer, FaDatabase, FaSave, FaHdd, FaRocket, FaSync, FaTrash, FaClipboardList, FaLock } from "react-icons/fa";
 
 // Типы данных для системных настроек
 export interface SettingsData {
@@ -121,8 +123,9 @@ export default function SettingsPage() {
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neon glyph-glow">
-              ⚙️ Системные настройки
+            <h1 className="text-2xl font-bold text-neon glyph-glow flex items-center gap-2">
+              <NeonIcon Icon={FaCog} size={24} variant="intense" />
+              Системные настройки
             </h1>
             <p className="text-soft text-sm mt-1">
               Конфигурация и мониторинг админ-панели
@@ -149,7 +152,7 @@ export default function SettingsPage() {
                 mockSystemStatus.server.status === "online" ? "text-green-400" : 
                 mockSystemStatus.server.status === "maintenance" ? "text-yellow-400" : "text-red-400"
               }`}>
-                🖥️
+                <NeonIcon Icon={FaServer} size={32} variant="intense" className="stats-icon" />
               </div>
             </div>
           </div>
@@ -167,7 +170,7 @@ export default function SettingsPage() {
               <div className={`text-2xl ${
                 mockSystemStatus.database.status === "connected" ? "text-green-400" : "text-red-400"
               }`}>
-                🗄️
+                <NeonIcon Icon={FaDatabase} size={32} variant="cyan" className="stats-icon" />
               </div>
             </div>
           </div>
@@ -187,7 +190,7 @@ export default function SettingsPage() {
                 mockSystemStatus.memory.usage < 50 ? "text-green-400" :
                 mockSystemStatus.memory.usage < 80 ? "text-yellow-400" : "text-red-400"
               }`}>
-                💾
+                <NeonIcon Icon={FaSave} size={32} variant="default" className="stats-icon" />
               </div>
             </div>
           </div>
@@ -207,7 +210,7 @@ export default function SettingsPage() {
                 mockSystemStatus.disk.usage < 50 ? "text-green-400" :
                 mockSystemStatus.disk.usage < 80 ? "text-yellow-400" : "text-red-400"
               }`}>
-                💽
+                <NeonIcon Icon={FaHdd} size={32} variant="purple" className="stats-icon" />
               </div>
             </div>
           </div>
@@ -224,7 +227,8 @@ export default function SettingsPage() {
                            : "text-soft hover:text-base hover:bg-subtle/50"
                          }`}
             >
-              ⚙️ Общие настройки
+              <NeonIcon Icon={FaCog} size={16} variant="default" />
+              Общие настройки
             </button>
             <button
               onClick={() => обработчикПереключенияВкладки("database")}
@@ -234,7 +238,8 @@ export default function SettingsPage() {
                            : "text-soft hover:text-base hover:bg-subtle/50"
                          }`}
             >
-              🗄️ База данных
+              <NeonIcon Icon={FaDatabase} size={16} variant="cyan" />
+              База данных
             </button>
             <button
               onClick={() => обработчикПереключенияВкладки("security")}
@@ -244,7 +249,8 @@ export default function SettingsPage() {
                            : "text-soft hover:text-base hover:bg-subtle/50"
                          }`}
             >
-              🔒 Безопасность
+              <NeonIcon Icon={FaLock} size={16} variant="red" />
+              Безопасность
             </button>
           </div>
 
@@ -276,7 +282,7 @@ export default function SettingsPage() {
         {/* Быстрые действия */}
         <div className="bg-subtle border border-line rounded-lg bevel p-4">
           <h3 className="text-lg font-bold text-base mb-4 flex items-center space-x-2">
-            <span>🚀</span>
+            <NeonIcon Icon={FaRocket} size={20} variant="intense" />
             <span>Быстрые действия</span>
           </h3>
           <div className="flex flex-wrap gap-3">
@@ -285,28 +291,32 @@ export default function SettingsPage() {
               className="px-4 py-2 bg-yellow-400/20 border border-yellow-400 text-yellow-400
                        hover:bg-yellow-400/30 rounded font-medium transition-colors"
             >
-              🔄 Перезагрузить сервер
+              <NeonIcon Icon={FaSync} size={16} variant="orange" />
+              Перезагрузить сервер
             </button>
             <button
               onClick={() => console.log("Очистка кеша...")}
               className="px-4 py-2 bg-cyan/20 border border-cyan text-cyan
                        hover:bg-cyan/30 rounded font-medium transition-colors"
             >
-              🗑️ Очистить кеш
+              <NeonIcon Icon={FaTrash} size={16} variant="red" />
+              Очистить кеш
             </button>
             <button
               onClick={() => console.log("Создание бекапа...")}
               className="px-4 py-2 bg-green-400/20 border border-green-400 text-green-400
                        hover:bg-green-400/30 rounded font-medium transition-colors"
             >
-              💾 Создать бекап
+              <NeonIcon Icon={FaSave} size={16} variant="cyan" />
+              Создать бекап
             </button>
             <button
               onClick={() => console.log("Просмотр логов...")}
               className="px-4 py-2 bg-purple-400/20 border border-purple-400 text-purple-400
                        hover:bg-purple-400/30 rounded font-medium transition-colors"
             >
-              📋 Просмотр логов
+              <NeonIcon Icon={FaClipboardList} size={16} variant="default" />
+              Просмотр логов
             </button>
           </div>
         </div>

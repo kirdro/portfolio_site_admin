@@ -2,6 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NeonIcon } from "./ui/NeonIcon";
+import { type IconType } from 'react-icons';
+import { 
+  FaTachometerAlt, 
+  FaUsers, 
+  FaRocket, 
+  FaBolt, 
+  FaComments, 
+  FaRobot, 
+  FaPen,
+  FaEnvelope,
+  FaCog,
+  FaChevronLeft,
+  FaChevronRight
+} from "react-icons/fa";
 
 interface AdminSidebarProps {
   isOpen: boolean;
@@ -11,7 +26,7 @@ interface AdminSidebarProps {
 interface MenuItem {
   href: string;
   label: string;
-  icon: string;
+  icon: IconType;
   description: string;
 }
 
@@ -19,55 +34,55 @@ const menuItems: MenuItem[] = [
   {
     href: "/dashboard",
     label: "Dashboard",
-    icon: "⚡",
+    icon: FaTachometerAlt,
     description: "Главная панель"
   },
   {
     href: "/users",
     label: "Пользователи",
-    icon: "👥",
+    icon: FaUsers,
     description: "Управление пользователями"
   },
   {
     href: "/projects",
     label: "Проекты",
-    icon: "🚀",
+    icon: FaRocket,
     description: "Портфолио проекты"
   },
   {
     href: "/skills",
     label: "Навыки",
-    icon: "⚡",
+    icon: FaBolt,
     description: "Управление навыками"
   },
   {
     href: "/chat",
     label: "Чат",
-    icon: "💬",
+    icon: FaComments,
     description: "Общий чат сайта"
   },
   {
     href: "/ai-chat",
     label: "ИИ Чат",
-    icon: "🤖",
+    icon: FaRobot,
     description: "Чат с ИИ"
   },
   {
     href: "/blog",
     label: "Блог",
-    icon: "📝",
+    icon: FaPen,
     description: "Управление блогом"
   },
   {
     href: "/contacts",
     label: "Обращения",
-    icon: "📧",
+    icon: FaEnvelope,
     description: "Контактные формы"
   },
   {
     href: "/settings",
     label: "Настройки",
-    icon: "⚙️",
+    icon: FaCog,
     description: "Системные параметры"
   }
 ];
@@ -90,9 +105,12 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
             <button
               onClick={onToggle}
               className="p-2 rounded hover:bg-green-500/20 transition-colors"
-              style={{color: '#00FF99'}}
             >
-              {isOpen ? '◀' : '▶'}
+              <NeonIcon 
+                Icon={isOpen ? FaChevronLeft : FaChevronRight}
+                size={16}
+                variant="default"
+              />
             </button>
           </div>
         </div>
@@ -116,10 +134,14 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
                     `}
                   >
                     <div className="flex items-center space-x-3">
-                      {/* Иконка */}
-                      <span className="text-lg flex-shrink-0">
-                        {item.icon}
-                      </span>
+                      {/* Неоновая иконка */}
+                      <div className="flex-shrink-0">
+                        <NeonIcon 
+                          Icon={item.icon}
+                          size={18}
+                          variant={isActive ? "intense" : "default"}
+                        />
+                      </div>
                       
                       {/* Текст (показываем только когда боковая панель открыта) */}
                       {isOpen && (

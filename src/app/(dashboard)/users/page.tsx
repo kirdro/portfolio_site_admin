@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { api } from "../../../utils/api";
 import { UsersTable, type UserTableData } from "../../../components/admin/users/UsersTable";
 import { UserForm } from "../../../components/admin/users/UserForm";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaUsers } from "react-icons/fa";
 
 /**
  * Страница управления пользователями портфолио
@@ -68,8 +70,9 @@ export default function UsersPage() {
       {/* Заголовок страницы */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neon glyph-glow">
-            👥 Управление пользователями
+          <h1 className="text-2xl font-bold text-neon glyph-glow flex items-center gap-2">
+            <NeonIcon Icon={FaUsers} size={24} variant="intense" />
+            Управление пользователями
           </h1>
           <p className="text-soft text-sm mt-1">
             Просмотр и редактирование пользователей портфолио

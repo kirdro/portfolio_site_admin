@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { api } from "../../../utils/api";
 import { ChatMessages } from "../../../components/admin/chat/ChatMessages";
 import { ChatStats } from "../../../components/admin/chat/ChatStats";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaComments, FaChartLine, FaUsers, FaShieldAlt, FaRobot } from "react-icons/fa";
 
 // Типы данных для сообщений
 export interface ChatMessageData {
@@ -135,8 +137,9 @@ export default function ChatPage() {
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neon glyph-glow">
-              💬 Модерация чатов
+            <h1 className="text-2xl font-bold text-neon glyph-glow flex items-center gap-2">
+              <NeonIcon Icon={FaComments} size={24} variant="intense" />
+              Модерация чатов
             </h1>
             <p className="text-soft text-sm mt-1">
               Управление сообщениями общего и ИИ чата
@@ -154,7 +157,7 @@ export default function ChatPage() {
                 </div>
                 <div className="text-sm text-soft">Всего сообщений</div>
               </div>
-              <div className="text-2xl text-neon">💬</div>
+              <NeonIcon Icon={FaComments} size={32} variant="intense" className="stats-icon" />
             </div>
           </div>
 
@@ -166,7 +169,7 @@ export default function ChatPage() {
                 </div>
                 <div className="text-sm text-soft">За последние 24ч</div>
               </div>
-              <div className="text-2xl text-cyan">📈</div>
+              <NeonIcon Icon={FaChartLine} size={32} variant="cyan" className="stats-icon" />
             </div>
           </div>
 
@@ -178,7 +181,7 @@ export default function ChatPage() {
                 </div>
                 <div className="text-sm text-soft">Активные пользователи</div>
               </div>
-              <div className="text-2xl text-purple-400">👥</div>
+              <NeonIcon Icon={FaUsers} size={32} variant="purple" className="stats-icon" />
             </div>
           </div>
 
@@ -190,7 +193,7 @@ export default function ChatPage() {
                 </div>
                 <div className="text-sm text-soft">Модерационных действий</div>
               </div>
-              <div className="text-2xl text-orange-400">⚔️</div>
+              <NeonIcon Icon={FaShieldAlt} size={32} variant="orange" className="stats-icon" />
             </div>
           </div>
         </div>
@@ -206,7 +209,8 @@ export default function ChatPage() {
                            : "text-soft hover:text-base hover:bg-subtle/50"
                          }`}
             >
-              💬 Общий чат ({mockGeneralMessages.length})
+              <NeonIcon Icon={FaComments} size={16} variant="default" />
+              Общий чат ({mockGeneralMessages.length})
             </button>
             <button
               onClick={() => обработчикПереключенияВкладки("ai")}
@@ -216,7 +220,8 @@ export default function ChatPage() {
                            : "text-soft hover:text-base hover:bg-subtle/50"
                          }`}
             >
-              🤖 ИИ чат ({mockAiMessages.length})
+              <NeonIcon Icon={FaRobot} size={16} variant="cyan" />
+              ИИ чат ({mockAiMessages.length})
             </button>
             <button
               onClick={() => обработчикПереключенияВкладки("stats")}

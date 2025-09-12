@@ -1,6 +1,18 @@
 "use client";
 
 import { api } from '../../utils/api';
+import { NeonIcon } from '../../components/ui/NeonIcon';
+import { 
+  FaUsers, 
+  FaFolder, 
+  FaComments, 
+  FaWrench, 
+  FaBolt, 
+  FaPen, 
+  FaChartBar,
+  FaChartLine,
+  FaGlobe 
+} from 'react-icons/fa';
 
 export default function DashboardPage() {
   // Подключаем реальную статистику из БД
@@ -22,7 +34,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">👥</div>
+              <NeonIcon Icon={FaUsers} size={32} variant="intense" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 TOTAL
               </div>
@@ -37,7 +49,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">📂</div>
+              <NeonIcon Icon={FaFolder} size={32} variant="cyan" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 PROJECTS
               </div>
@@ -52,7 +64,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">💬</div>
+              <NeonIcon Icon={FaComments} size={32} variant="purple" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 MESSAGES
               </div>
@@ -67,7 +79,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">🔧</div>
+              <NeonIcon Icon={FaWrench} size={32} variant="orange" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 SYSTEM
               </div>
@@ -85,7 +97,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="cyber-card p-6">
             <div className="flex items-center mb-4">
-              <div className="text-2xl mr-3">⚡</div>
+              <NeonIcon Icon={FaBolt} size={24} variant="intense" className="mr-3" />
               <div>
                 <h3 className="font-bold" style={{color: '#00FF99'}}>
                   Быстрые действия
@@ -97,20 +109,23 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-2">
               <button className="btn-glitch w-full p-2 rounded text-left">
-                📝 Создать проект
+                <NeonIcon Icon={FaPen} size={16} variant="default" className="inline mr-2" />
+                Создать проект
               </button>
               <button className="btn-glitch w-full p-2 rounded text-left">
-                💬 Модерация чата
+                <NeonIcon Icon={FaComments} size={16} variant="default" className="inline mr-2" />
+                Модерация чата
               </button>
               <button className="btn-glitch w-full p-2 rounded text-left">
-                📊 Просмотр аналитики
+                <NeonIcon Icon={FaChartBar} size={16} variant="default" className="inline mr-2" />
+                Просмотр аналитики
               </button>
             </div>
           </div>
 
           <div className="cyber-card p-6">
             <div className="flex items-center mb-4">
-              <div className="text-2xl mr-3">📈</div>
+              <NeonIcon Icon={FaChartLine} size={24} variant="cyan" className="mr-3" />
               <div>
                 <h3 className="font-bold" style={{color: '#00FF99'}}>
                   Последние активности
@@ -138,7 +153,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center mb-4">
-              <div className="text-2xl mr-3">🌐</div>
+              <NeonIcon Icon={FaGlobe} size={24} variant="purple" className="mr-3" />
               <div>
                 <h3 className="font-bold" style={{color: '#00FF99'}}>
                   Статус системы

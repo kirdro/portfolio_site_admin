@@ -5,6 +5,8 @@ import { api } from "../../../utils/api";
 import { AiChatInterface } from "../../../components/admin/ai-chat/AiChatInterface";
 import { AiChatHistory } from "../../../components/admin/ai-chat/AiChatHistory";
 import { AiChatSettings } from "../../../components/admin/ai-chat/AiChatSettings";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaRobot, FaComments, FaScroll, FaCog } from "react-icons/fa";
 
 /**
  * Основная страница AI-чата админ панели
@@ -26,7 +28,10 @@ export default function AiChatPage() {
       {/* Заголовок и статистика */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-base mb-2">🤖 AI-чат интерфейс</h1>
+          <h1 className="text-2xl font-bold text-base mb-2 flex items-center gap-2">
+            <NeonIcon Icon={FaRobot} size={24} variant="intense" />
+            AI-чат интерфейс
+          </h1>
           <p className="text-soft">Управление ИИ диалогами и настройки AI модели</p>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4 md:mt-0">
@@ -67,7 +72,8 @@ export default function AiChatPage() {
               : "text-soft hover:text-base hover:bg-panel"
           }`}
         >
-          💬 Интерфейс чата
+          <NeonIcon Icon={FaComments} size={16} variant="default" />
+          Интерфейс чата
         </button>
         <button
           onClick={() => обработчикВкладки("history")}
@@ -77,7 +83,8 @@ export default function AiChatPage() {
               : "text-soft hover:text-base hover:bg-panel"
           }`}
         >
-          📜 История диалогов
+          <NeonIcon Icon={FaScroll} size={16} variant="cyan" />
+          История диалогов
         </button>
         <button
           onClick={() => обработчикВкладки("settings")}
@@ -87,7 +94,8 @@ export default function AiChatPage() {
               : "text-soft hover:text-base hover:bg-panel"
           }`}
         >
-          ⚙️ Настройки AI
+          <NeonIcon Icon={FaCog} size={16} variant="purple" />
+          Настройки AI
         </button>
       </div>
 

@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { api } from "../../../utils/api";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaPen, FaStar } from "react-icons/fa";
 
 export default function BlogPage() {
   const [page, setPage] = useState(1);
@@ -60,7 +62,7 @@ export default function BlogPage() {
             href="/blog/new"
             className="px-6 py-3 bg-neon text-white rounded-lg font-semibold hover:bg-neon/90 transition-all bevel flex items-center gap-2 shadow-neon"
           >
-            <span className="text-xl">✨</span>
+            <NeonIcon Icon={FaStar} size={20} variant="default" />
             <span>Создать пост</span>
           </Link>
         </div>
@@ -129,7 +131,7 @@ export default function BlogPage() {
             href="/blog/new"
             className="px-6 py-2 bg-neon text-white rounded-lg font-semibold hover:bg-neon/90 transition-all bevel flex items-center gap-2"
           >
-            <span>✨</span>
+            <NeonIcon Icon={FaStar} size={20} variant="default" />
             Новый пост
           </Link>
         </div>
@@ -143,14 +145,14 @@ export default function BlogPage() {
           </div>
         ) : postsData?.posts.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">📝</div>
+            <NeonIcon Icon={FaPen} size={64} variant="intense" className="mb-4" />
             <h3 className="text-xl font-semibold mb-2">Пока нет постов</h3>
             <p className="text-soft mb-4">Создайте первый пост для блога</p>
             <Link
               href="/blog/new"
               className="inline-flex items-center gap-2 px-6 py-3 bg-neon text-white rounded-lg font-semibold hover:bg-neon/90 transition-all bevel"
             >
-              <span>✨</span>
+              <NeonIcon Icon={FaStar} size={20} variant="default" />
               Создать пост
             </Link>
           </div>

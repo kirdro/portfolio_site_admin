@@ -4,6 +4,8 @@ import React, { useState, useCallback } from "react";
 import { api } from "../../../utils/api";
 import { ProjectsGrid } from "../../../components/admin/projects/ProjectsGrid";
 import { ProjectForm } from "../../../components/admin/projects/ProjectForm";
+import { NeonIcon } from "../../../components/ui/NeonIcon";
+import { FaFolder, FaPlus } from "react-icons/fa";
 
 // Типы данных для проектов
 export interface ProjectData {
@@ -66,8 +68,9 @@ export default function ProjectsPage() {
         {/* Заголовок страницы */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-neon glyph-glow">
-              📁 Управление проектами
+            <h1 className="text-2xl font-bold text-neon glyph-glow flex items-center gap-2">
+              <NeonIcon Icon={FaFolder} size={24} variant="intense" />
+              Управление проектами
             </h1>
             <p className="text-soft text-sm mt-1">
               Создание и редактирование проектов портфолио
@@ -81,7 +84,8 @@ export default function ProjectsPage() {
                      hover:bg-neon/30 hover:shadow-neon rounded-md text-sm font-medium
                      bevel transition-all duration-300"
           >
-            ➕ Создать проект
+            <NeonIcon Icon={FaPlus} size={16} variant="default" />
+            Создать проект
           </button>
         </div>
 

@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NeonIcon } from "./NeonIcon";
+import { FaCheck, FaTimes, FaExclamationTriangle, FaInfoCircle, FaBullhorn } from "react-icons/fa";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
@@ -45,7 +47,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
     switch (type) {
       case "success":
         return {
-          icon: "✅",
+          icon: <NeonIcon Icon={FaCheck} size={18} variant="default" />,
           borderColor: "border-green-500",
           bgColor: "bg-green-500/20",
           textColor: "text-green-400",
@@ -53,7 +55,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
         };
       case "error":
         return {
-          icon: "❌",
+          icon: <NeonIcon Icon={FaTimes} size={18} variant="red" />,
           borderColor: "border-red-500",
           bgColor: "bg-red-500/20",
           textColor: "text-red-400",
@@ -61,7 +63,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
         };
       case "warning":
         return {
-          icon: "⚠️",
+          icon: <NeonIcon Icon={FaExclamationTriangle} size={18} variant="orange" />,
           borderColor: "border-yellow-500",
           bgColor: "bg-yellow-500/20",
           textColor: "text-yellow-400",
@@ -69,7 +71,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
         };
       case "info":
         return {
-          icon: "ℹ️",
+          icon: <NeonIcon Icon={FaInfoCircle} size={18} variant="cyan" />,
           borderColor: "border-cyan",
           bgColor: "bg-cyan/20",
           textColor: "text-cyan",
@@ -77,7 +79,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
         };
       default:
         return {
-          icon: "📢",
+          icon: <NeonIcon Icon={FaBullhorn} size={18} variant="cyan" />,
           borderColor: "border-line",
           bgColor: "bg-panel",
           textColor: "text-base",
@@ -113,7 +115,7 @@ function ToastItem({ toast, onRemove }: ToastProps) {
         >
           <div className="flex items-start gap-3">
             {/* Иконка */}
-            <div className="flex-shrink-0 text-lg">
+            <div className="flex-shrink-0">
               {styles.icon}
             </div>
 

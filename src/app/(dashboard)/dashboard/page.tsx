@@ -1,6 +1,16 @@
 "use client";
 
 import { api } from '../../../utils/api';
+import { NeonIcon } from '../../../components/ui/NeonIcon';
+import { 
+  FaUsers, 
+  FaRocket, 
+  FaComments, 
+  FaEnvelope,
+  FaPlus,
+  FaBolt,
+  FaGlobe
+} from 'react-icons/fa';
 
 export default function DashboardPage() {
   // Подключаем реальную статистику из БД
@@ -22,7 +32,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">👥</div>
+              <NeonIcon Icon={FaUsers} size={28} variant="intense" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 TOTAL
               </div>
@@ -37,7 +47,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">🚀</div>
+              <NeonIcon Icon={FaRocket} size={28} variant="intense" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 ACTIVE
               </div>
@@ -52,7 +62,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">💬</div>
+              <NeonIcon Icon={FaComments} size={28} variant="intense" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 TODAY
               </div>
@@ -67,7 +77,7 @@ export default function DashboardPage() {
 
           <div className="cyber-card p-6">
             <div className="flex items-center justify-between mb-3">
-              <div className="text-2xl">📧</div>
+              <NeonIcon Icon={FaEnvelope} size={28} variant="intense" />
               <div className="text-xs font-mono" style={{color: '#B8C5C0'}}>
                 NEW
               </div>
@@ -88,22 +98,22 @@ export default function DashboardPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <button className="btn-glitch bevel p-4 font-mono text-sm transition-all">
-              <div className="text-2xl mb-2">➕</div>
+              <NeonIcon Icon={FaPlus} size={24} variant="intense" className="mb-2" />
               ДОБАВИТЬ ПРОЕКТ
             </button>
             <button className="btn-glitch bevel p-4 font-mono text-sm transition-all">
-              <div className="text-2xl mb-2">⚡</div>
+              <NeonIcon Icon={FaBolt} size={24} variant="intense" className="mb-2" />
               ОБНОВИТЬ НАВЫКИ
             </button>
             <button className="btn-glitch bevel p-4 font-mono text-sm transition-all">
-              <div className="text-2xl mb-2">💬</div>
+              <NeonIcon Icon={FaComments} size={24} variant="intense" className="mb-2" />
               МОДЕРАЦИЯ ЧАТА
             </button>
             <button 
               onClick={() => window.open('https://kirdro.ru', '_blank')}
               className="btn-glitch bevel p-4 font-mono text-sm transition-all"
             >
-              <div className="text-2xl mb-2">🌐</div>
+              <NeonIcon Icon={FaGlobe} size={24} variant="intense" className="mb-2" />
               ОТКРЫТЬ САЙТ
             </button>
           </div>
