@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from "react";
 import { z } from "zod";
 import type { ProjectData } from "../../../app/(dashboard)/projects/page";
-import { ImageUpload } from "../shared/ImageUpload";
+import { FileUploadDeferred } from "../../ui/FileUploadDeferred";
 import { api } from "../../../utils/api";
 import { Modal, ModalHeader, ModalBody, ModalFooter } from "../../ui/Modal";
 import { useToasts } from "../../ui/Toast";
@@ -18,9 +18,9 @@ interface ProjectFormProps {
 const projectSchema = z.object({
   title: z.string().min(1, "Название обязательно").max(100, "Название слишком длинное"),
   description: z.string().min(10, "Описание минимум 10 символов").max(500, "Описание слишком длинное"),
-  imageUrl: z.string().url("Некорректный URL изображения").optional().nullable(),
-  demoUrl: z.string().url("Некорректный URL демо").optional().nullable(),
-  githubUrl: z.string().url("Некорректный URL репозитория").optional().nullable(),
+  imageUrl: z.string().url("Некорректный URL изображения").or(z.literal("")).optional().nullable(),
+  demoUrl: z.string().url("Некорректный URL демо").or(z.literal("")).optional().nullable(),
+  githubUrl: z.string().url("Некорректный URL репозитория").or(z.literal("")).optional().nullable(),
   featured: z.boolean(),
   tags: z.array(z.string()).min(1, "Добавьте хотя бы один тег"),
 });
@@ -34,6 +34,8 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
   const { success, error: showError } = useToasts();
   
   // Подключаем tRPC мутации
+  const uploadFileMutation = api.files.upload.useMutation();
+  
   const createMutation = api.admin.projects.create.useMutation({
     onSuccess: () => {
       success("Проект создан", "Новый проект успешно добавлен в портфолио");
@@ -69,6 +71,8 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [currentTag, setCurrentTag] = useState("");
+  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
 
   // Расширенный список доступных технологий для автодополнения
   const availableTags = [
@@ -99,15 +103,18 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
     // Мобильная разработка
     "React Native", "Flutter", "Ionic", "Expo",
     // Сборщики и пакетные менеджеры
-    "npm", "yarn", "pnpm", "Bun",
+    "npm", "yarn", "pnpm",
     // Версионный контроль
     "Git", "GitHub", "GitLab", "Bitbucket",
     // Аналитика и мониторинг
     "Sentry", "DataDog", "New Relic", "Grafana", "Prometheus"
   ];
 
+  // Состояние загрузки файла
+  const [isFileUploading, setIsFileUploading] = useState(false);
+
   // Обработчик изменения полей формы
-  const обработчикИзмененияПоля = useCallback((field: string, value: any) => {
+  const handleFieldChange = useCallback((field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -124,7 +131,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
   }, [errors]);
 
   // Обработчик добавления тега
-  const обработчикДобавленияТега = useCallback(() => {
+  const handleAddTag = useCallback(() => {
     const trimmedTag = currentTag.trim();
     if (trimmedTag && !formData.tags.includes(trimmedTag)) {
       setFormData(prev => ({
@@ -136,20 +143,22 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
   }, [currentTag, formData.tags]);
 
   // Обработчик удаления тега
-  const обработчикУдаленияТега = useCallback((tagToRemove: string) => {
+  const handleRemoveTag = useCallback((tagToRemove: string) => {
     setFormData(prev => ({
       ...prev,
       tags: prev.tags.filter(tag => tag !== tagToRemove)
     }));
   }, []);
 
-  // Обработчик загрузки изображения
-  const обработчикЗагрузкиИзображения = useCallback((imageUrl: string) => {
-    обработчикИзмененияПоля("imageUrl", imageUrl);
-  }, [обработчикИзмененияПоля]);
+  // Обработчик выбора изображения
+  const handleImageSelect = useCallback((file: File | null, previewUrl: string | null) => {
+    setSelectedImageFile(file);
+    setPreviewImageUrl(previewUrl);
+  }, []);
+
 
   // Валидация формы
-  const валидироватьФорму = () => {
+  const validateForm = () => {
     try {
       projectSchema.parse(formData);
       setErrors({});
@@ -157,9 +166,9 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
-        (error as any).errors.forEach((err: any) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as string] = err.message;
+        error.issues.forEach((issue) => {
+          if (issue.path[0]) {
+            newErrors[issue.path[0] as string] = issue.message;
           }
         });
         setErrors(newErrors);
@@ -169,19 +178,48 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
   };
 
   // Обработчик отправки формы
-  const обработчикОтправки = useCallback(async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!валидироватьФорму()) {
+    if (!validateForm()) {
       return;
     }
     
     try {
+      let imageUrl = formData.imageUrl;
+      
+      // Если выбран новый файл изображения, загружаем его сначала в S3
+      if (selectedImageFile) {
+        setIsFileUploading(true);
+        console.log('🔄 Загружаем изображение в S3...');
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve) => {
+          reader.onload = () => {
+            const base64 = (reader.result as string).split(',')[1]!;
+            resolve(base64);
+          };
+        });
+        reader.readAsDataURL(selectedImageFile);
+        
+        const base64 = await base64Promise;
+        const uploadResult = await uploadFileMutation.mutateAsync({
+          file: base64,
+          fileName: selectedImageFile.name,
+          mimeType: selectedImageFile.type,
+          category: 'project',
+          maxSize: 5 * 1024 * 1024, // 5MB для проектов
+        });
+        
+        imageUrl = uploadResult.url;
+        setIsFileUploading(false);
+        console.log('✅ Изображение загружено:', imageUrl);
+      }
+
       // Подготавливаем данные для отправки
       const dataToSubmit = {
         title: formData.title,
         description: formData.description,
-        imageUrl: formData.imageUrl || null,
+        imageUrl: imageUrl || null,
         demoUrl: formData.demoUrl || null,
         githubUrl: formData.githubUrl || null,
         featured: formData.featured,
@@ -201,8 +239,9 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
     } catch (error) {
       // Ошибки уже обрабатываются в onError мутаций
       console.error("Ошибка при сохранении:", error);
+      setIsFileUploading(false);
     }
-  }, [formData, isCreating, project, createMutation, updateMutation, валидироватьФорму]);
+  }, [formData, isCreating, project, createMutation, updateMutation, validateForm, selectedImageFile, uploadFileMutation]);
 
   return (
     <Modal
@@ -211,7 +250,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
       title={isCreating ? "➕ Создать проект" : "✏️ Редактировать проект"}
       size="lg"
     >
-      <form onSubmit={обработчикОтправки} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
             {/* Название */}
             <div>
               <label className="block text-sm font-medium text-base mb-2">
@@ -220,7 +259,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
               <input
                 type="text"
                 value={formData.title}
-                onChange={(e) => обработчикИзмененияПоля("title", e.target.value)}
+                onChange={(e) => handleFieldChange("title", e.target.value)}
                 className={`w-full px-3 py-2 bg-subtle border rounded-md text-base
                            focus:border-neon focus:ring-1 focus:ring-neon transition-colors
                            ${errors.title ? "border-red-500" : "border-line"}`}
@@ -239,7 +278,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => обработчикИзмененияПоля("description", e.target.value)}
+                onChange={(e) => handleFieldChange("description", e.target.value)}
                 rows={4}
                 className={`w-full px-3 py-2 bg-subtle border rounded-md text-base resize-none
                            focus:border-neon focus:ring-1 focus:ring-neon transition-colors
@@ -264,10 +303,17 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
               <label className="block text-sm font-medium text-base mb-2">
                 Изображение проекта
               </label>
-              <ImageUpload
-                currentImageUrl={formData.imageUrl}
-                onImageUpload={обработчикЗагрузкиИзображения}
+              <FileUploadDeferred
+                currentFileUrl={formData.imageUrl}
+                onFileSelected={handleImageSelect}
+                category="project"
+                acceptedTypes="image/*"
+                maxSize={5 * 1024 * 1024}
+                preview={true}
               />
+              {errors.imageUrl && (
+                <p className="text-red-400 text-sm mt-1">{errors.imageUrl}</p>
+              )}
             </div>
 
             {/* URL ссылки */}
@@ -279,7 +325,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                 <input
                   type="url"
                   value={formData.demoUrl}
-                  onChange={(e) => обработчикИзмененияПоля("demoUrl", e.target.value)}
+                  onChange={(e) => handleFieldChange("demoUrl", e.target.value)}
                   className={`w-full px-3 py-2 bg-subtle border rounded-md text-base
                              focus:border-neon focus:ring-1 focus:ring-neon transition-colors
                              ${errors.demoUrl ? "border-red-500" : "border-line"}`}
@@ -297,7 +343,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                 <input
                   type="url"
                   value={formData.githubUrl}
-                  onChange={(e) => обработчикИзмененияПоля("githubUrl", e.target.value)}
+                  onChange={(e) => handleFieldChange("githubUrl", e.target.value)}
                   className={`w-full px-3 py-2 bg-subtle border rounded-md text-base
                              focus:border-neon focus:ring-1 focus:ring-neon transition-colors
                              ${errors.githubUrl ? "border-red-500" : "border-line"}`}
@@ -321,7 +367,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                   type="text"
                   value={currentTag}
                   onChange={(e) => setCurrentTag(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), обработчикДобавленияТега())}
+                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
                   className="flex-1 px-3 py-2 bg-subtle border border-line rounded-md text-base
                            focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
                   placeholder="Добавить технологию"
@@ -329,7 +375,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                 />
                 <button
                   type="button"
-                  onClick={обработчикДобавленияТега}
+                  onClick={handleAddTag}
                   className="px-3 py-2 bg-neon/20 border border-neon text-neon rounded-md
                            hover:bg-neon/30 transition-colors"
                 >
@@ -355,7 +401,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                     {tag}
                     <button
                       type="button"
-                      onClick={() => обработчикУдаленияТега(tag)}
+                      onClick={() => handleRemoveTag(tag)}
                       className="ml-2 text-soft hover:text-red-400 transition-colors"
                     >
                       ✕
@@ -374,7 +420,7 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
                 type="checkbox"
                 id="featured"
                 checked={formData.featured}
-                onChange={(e) => обработчикИзмененияПоля("featured", e.target.checked)}
+                onChange={(e) => handleFieldChange("featured", e.target.checked)}
                 className="mr-2"
               />
               <label htmlFor="featured" className="text-sm text-base">
@@ -394,13 +440,16 @@ export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: Pr
           </button>
           <button
             type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
+            disabled={createMutation.isPending || updateMutation.isPending || isFileUploading}
             className="px-6 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                      disabled:opacity-50 disabled:cursor-not-allowed
-                     bevel transition-all duration-300"
+                     bevel transition-all duration-300 flex items-center gap-2"
           >
-            {(createMutation.isPending || updateMutation.isPending) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
+            {isFileUploading && (
+              <div className="animate-spin rounded-full h-4 w-4 border-2 border-neon border-t-transparent"></div>
+            )}
+            {isFileUploading ? "Загрузка изображения..." : (createMutation.isPending || updateMutation.isPending) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
           </button>
         </ModalFooter>
       </form>

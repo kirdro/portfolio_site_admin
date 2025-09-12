@@ -23,6 +23,7 @@ model User {
   Project       Project[]
   BlogPost      BlogPost[]
   sessions      Session[]
+  files         files[]         @relation("files_uploadedByToUser")
 
   @@map("User")
 }
@@ -96,26 +97,28 @@ model Skill {
 }
 
 model ChatMessage {
-  id        String   @id @default(cuid())
-  content   String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  content     String
+  userId      String
+  attachments String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@map("ChatMessage")
 }
 
 model AiChatMessage {
-  id        String   @id @default(cuid())
-  content   String
-  userId    String
-  isAI      Boolean  @default(false)
-  modelName String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime
-  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  content     String
+  userId      String
+  isAI        Boolean  @default(false)
+  modelName   String?
+  attachments String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([userId])
@@ -242,8 +245,7 @@ model files {
   s3Key                         String                 @unique
   s3Url                         String
   updatedAt                     DateTime
-  users_files_uploadedByTousers users                  @relation("files_uploadedByTousers", fields: [uploadedBy], references: [id], onDelete: Cascade)
-  users_users_avatarIdTofiles   users[]                @relation("users_avatarIdTofiles")
+  user_files_uploadedByToUser   User                   @relation("files_uploadedByToUser", fields: [uploadedBy], references: [id], onDelete: Cascade)
   electricity_readings          electricity_readings[] @relation("ElectricityAttachment")
   products                      products[]             @relation("ProductImage")
 }
@@ -381,12 +383,10 @@ model users {
   avatarId                      String?
   electricity_bills             electricity_bills[]
   electricity_readings          electricity_readings[]
-  files_files_uploadedByTousers files[]                @relation("files_uploadedByTousers")
   task_projects                 task_projects[]
   time_entries                  time_entries[]
   time_tasks                    time_tasks[]
   user_balances                 user_balances?
-  files_users_avatarIdTofiles   files?                 @relation("users_avatarIdTofiles", fields: [avatarId], references: [id])
   teams                         teams?                 @relation(fields: [teamId], references: [id])
 }
 

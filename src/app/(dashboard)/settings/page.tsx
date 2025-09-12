@@ -4,8 +4,9 @@ import React, { useState, useCallback } from "react";
 import { SystemSettings } from "../../../components/admin/settings/SystemSettings";
 import { DatabaseStatus } from "../../../components/admin/settings/DatabaseStatus";
 import { SecuritySettings } from "../../../components/admin/settings/SecuritySettings";
+import { MainPhotoSettings } from "../../../components/admin/settings/MainPhotoSettings";
 import { NeonIcon } from "../../../components/ui/NeonIcon";
-import { FaCog, FaServer, FaDatabase, FaSave, FaHdd, FaRocket, FaSync, FaTrash, FaClipboardList, FaLock } from "react-icons/fa";
+import { FaCog, FaServer, FaDatabase, FaSave, FaHdd, FaRocket, FaSync, FaTrash, FaClipboardList, FaLock, FaImage } from "react-icons/fa";
 
 // Типы данных для системных настроек
 export interface SettingsData {
@@ -56,7 +57,7 @@ export interface SystemStatus {
 export default function SettingsPage() {
 
   // Состояние активной вкладки
-  const [activeTab, setActiveTab] = useState<"general" | "database" | "security">("general");
+  const [activeTab, setActiveTab] = useState<"general" | "database" | "security" | "media">("general");
 
   // Mock данные для тестирования интерфейса
   const mockSettings: SettingsData = {
@@ -100,7 +101,7 @@ export default function SettingsPage() {
   };
 
   // Обработчик переключения вкладок
-  const обработчикПереключенияВкладки = useCallback((tab: "general" | "database" | "security") => {
+  const обработчикПереключенияВкладки = useCallback((tab: "general" | "database" | "security" | "media") => {
     setActiveTab(tab);
   }, []);
 
@@ -252,6 +253,17 @@ export default function SettingsPage() {
               <NeonIcon Icon={FaLock} size={16} variant="red" />
               Безопасность
             </button>
+            <button
+              onClick={() => обработчикПереключенияВкладки("media")}
+              className={`px-6 py-3 font-medium transition-colors border-b-2 border-transparent
+                         ${activeTab === "media" 
+                           ? "text-purple-400 border-purple-400 bg-purple-400/10" 
+                           : "text-soft hover:text-base hover:bg-subtle/50"
+                         }`}
+            >
+              <NeonIcon Icon={FaImage} size={16} variant="purple" />
+              Медиа файлы
+            </button>
           </div>
 
           <div className="p-6">
@@ -275,6 +287,10 @@ export default function SettingsPage() {
                 settings={mockSettings}
                 onSave={обработчикСохраненияНастроек}
               />
+            )}
+
+            {activeTab === "media" && (
+              <MainPhotoSettings />
             )}
           </div>
         </div>

@@ -2,7 +2,7 @@
 const nextConfig = {
   typedRoutes: true,
   images: {
-    domains: ['i.pravatar.cc'],
+    domains: ['i.pravatar.cc', 's3.twcstorage.ru'],
     formats: ['image/webp', 'image/avif'],
     minimumCacheTTL: 60,
   },

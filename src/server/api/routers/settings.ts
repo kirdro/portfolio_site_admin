@@ -50,17 +50,11 @@ export const settingsRouter = createTRPCRouter({
   getAll: protectedProcedure
     .query(async ({ ctx }) => {
       const settings = await ctx.prisma.settings.findMany();
-      
-      const settingsMap: Record<string, any> = {};
-      settings.forEach(setting => {
-        settingsMap[setting.key] = setting.value;
-      });
-      
-      return settingsMap;
+      return settings;
     }),
 
-  // Сохранить одну настройку
-  set: protectedProcedure
+  // Сохранить одну настройку  
+  update: protectedProcedure
     .input(SettingSchema)
     .mutation(async ({ ctx, input }) => {
       const setting = await ctx.prisma.settings.upsert({

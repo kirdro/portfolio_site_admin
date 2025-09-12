@@ -96,7 +96,7 @@ export const authOptions: NextAuthOptions = {
   
   // Callbacks для обработки сессии и JWT с подробным логированием
   callbacks: {
-    // Проверяем доступ только для kirdro@yandex.ru
+    // Проверяем доступ только для kirdro@yandex.ru и создаём пользователя в базе
     async signIn({ user, account, profile }) {
       const startTime = Date.now();
       console.log(`🔐 SignIn callback started for: ${user?.email}`);
@@ -108,6 +108,27 @@ export const authOptions: NextAuthOptions = {
         if (user.email !== "kirdro@yandex.ru") {
           console.log(`❌ Заблокирован доступ для: ${user.email}`);
           return false;
+        }
+        
+        // Проверяем, существует ли пользователь в базе
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email }
+        });
+        
+        if (!existingUser) {
+          console.log(`👤 Создаём нового пользователя: ${user.email}`);
+          await prisma.user.create({
+            data: {
+              id: user.id,
+              name: user.name || null,
+              email: user.email || null,
+              image: user.image || null,
+              role: "ADMIN", // Автоматически ADMIN для kirdro@yandex.ru
+            }
+          });
+          console.log(`✅ Пользователь создан в базе данных`);
+        } else {
+          console.log(`👍 Пользователь уже существует в базе: ${existingUser.id}`);
         }
         
         console.log(`✅ Разрешен доступ для: ${user.email} (${Date.now() - startTime}ms)`);

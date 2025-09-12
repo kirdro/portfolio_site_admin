@@ -5,6 +5,7 @@ import { api } from "../../../../../utils/api";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { BlogEditor } from "../../../../../components/admin/blog/BlogEditor";
+import { FileUpload } from "../../../../../components/ui/FileUpload";
 import type { PartialBlock } from "@blocknote/core";
 
 interface EditBlogPostPageProps {
@@ -234,25 +235,15 @@ export default function EditBlogPostPage({ params }: EditBlogPostPageProps) {
                 <label className="block text-sm font-medium mb-2">
                   Обложка статьи
                 </label>
-                <input
-                  type="url"
-                  value={coverImage}
-                  onChange={(e) => setCoverImage(e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-3 bg-panel border border-line rounded-lg focus:border-neon focus:ring-1 focus:ring-neon/50 transition-all"
+                <FileUpload
+                  currentFileUrl={coverImage}
+                  onFileUploaded={setCoverImage}
+                  onFileDeleted={() => setCoverImage("")}
+                  category="blog"
+                  acceptedTypes="image/*"
+                  maxSize={10 * 1024 * 1024}
+                  preview={true}
                 />
-                {coverImage && (
-                  <div className="mt-2">
-                    <img
-                      src={coverImage}
-                      alt="Предпросмотр обложки"
-                      className="w-full max-w-md h-48 object-cover rounded-lg border border-line"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  </div>
-                )}
               </div>
             </div>
 
