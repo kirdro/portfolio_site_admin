@@ -53,6 +53,12 @@ const menuItems: MenuItem[] = [
     description: "Чат с ИИ"
   },
   {
+    href: "/blog",
+    label: "Блог",
+    icon: "📝",
+    description: "Управление блогом"
+  },
+  {
     href: "/contacts",
     label: "Обращения",
     icon: "📧",

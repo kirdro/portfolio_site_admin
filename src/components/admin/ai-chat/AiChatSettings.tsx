@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
+import { api } from "../../../utils/api";
 
 interface НастройкиAI {
   provider: "openai" | "groq";
@@ -22,19 +23,11 @@ interface НастройкиAI {
 export function AiChatSettings() {
   const [настройки, setНастройки] = useState<НастройкиAI>({
     provider: "groq",
-    model: "llama-3.3-70b-versatile",
+    model: "llama3-8b-8192",
     apiKey: "",
     temperature: 0.7,
     maxTokens: 2048,
-    systemPrompt: `Ты ИИ-ассистент портфолио сайта kirdro.ru разработчика Кирилла Дроздова. 
-
-Твоя цель - помочь посетителям узнать больше о:
-- Проектах Кирилла
-- Его навыках и опыте разработки
-- Контактной информации для сотрудничества
-- Технологиях которые он использует
-
-Отвечай дружелюбно, профессионально и по существу. Если не знаешь точного ответа, честно скажи об этом и предложи связаться напрямую с Кириллом.`,
+    systemPrompt: "",
     messageLimit: 50,
     moderationEnabled: true,
     autoRespond: true,
@@ -43,6 +36,48 @@ export function AiChatSettings() {
 
   const [сохранение, setСохранение] = useState(false);
   const [активнаяВкладка, setАктивнаяВкладка] = useState<"model" | "prompts" | "moderation" | "limits">("model");
+
+  // Загружаем настройки из БД
+  const { data: настройкиData, isLoading: загрузкаНастроек } = api.aiChat.getSettings.useQuery();
+
+  // Мутации для управления настройками
+  const updateSettingsMutation = api.aiChat.updateSettings.useMutation({
+    onSuccess: (result) => {
+      alert(result.сообщение);
+      setСохранение(false);
+    },
+    onError: (error) => {
+      alert(`Ошибка сохранения: ${error.message}`);
+      setСохранение(false);
+    }
+  });
+
+  const testSettingsMutation = api.aiChat.testSettings.useMutation({
+    onSuccess: (результат) => {
+      alert(`Тест AI прошел успешно!\n\nОтвет: ${результат.ответAI.slice(0, 100)}...\nВремя: ${результат.времяОтвета}с\nТокены: ${результат.токеныИспользовано}`);
+    },
+    onError: (error) => {
+      alert(`Ошибка тестирования: ${error.message}`);
+    }
+  });
+
+  // Обновляем локальные настройки при загрузке данных с сервера
+  useEffect(() => {
+    if (настройкиData) {
+      setНастройки({
+        provider: "groq", // Пока только Groq поддерживается
+        model: настройкиData.model,
+        apiKey: "", // API ключ не возвращается с сервера для безопасности
+        temperature: настройкиData.temperature,
+        maxTokens: настройкиData.maxTokens,
+        systemPrompt: настройкиData.systemPrompt,
+        messageLimit: настройкиData.messageLimit,
+        moderationEnabled: настройкиData.moderationEnabled,
+        autoRespond: настройкиData.autoRespond,
+        responseDelay: настройкиData.responseDelay,
+      });
+    }
+  }, [настройкиData]);
 
   // Обработчик изменения настроек
   const обработчикИзменения = useCallback(<K extends keyof НастройкиAI>(
@@ -58,39 +93,60 @@ export function AiChatSettings() {
   // Обработчик сохранения настроек
   const обработчикСохранения = useCallback(async () => {
     setСохранение(true);
-    try {
-      // Здесь будет вызов API для сохранения настроек
-      console.log("Сохранение настроек AI:", настройки);
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    } catch (error) {
-      console.error("Ошибка сохранения настроек AI:", error);
-    } finally {
-      setСохранение(false);
-    }
-  }, [настройки]);
+    
+    updateSettingsMutation.mutate({
+      model: настройки.model as "llama3-8b-8192" | "llama3-70b-8192" | "mixtral-8x7b-32768",
+      temperature: настройки.temperature,
+      maxTokens: настройки.maxTokens,
+      systemPrompt: настройки.systemPrompt,
+      messageLimit: настройки.messageLimit,
+      moderationEnabled: настройки.moderationEnabled,
+      autoRespond: настройки.autoRespond,
+      responseDelay: настройки.responseDelay,
+    });
+  }, [настройки, updateSettingsMutation]);
 
   // Обработчик сброса настроек
   const обработчикСброса = useCallback(() => {
     if (confirm("Сбросить все настройки AI к значениям по умолчанию?")) {
-      setНастройки({
-        provider: "groq",
-        model: "llama-3.3-70b-versatile",
-        apiKey: "",
-        temperature: 0.7,
-        maxTokens: 2048,
-        systemPrompt: "Ты ИИ-ассистент портфолио сайта kirdro.ru...",
-        messageLimit: 50,
-        moderationEnabled: true,
-        autoRespond: true,
-        responseDelay: 1.5
-      });
+      if (настройкиData) {
+        // Возвращаем к серверным значениям по умолчанию
+        setНастройки({
+          provider: "groq",
+          model: настройкиData.model,
+          apiKey: "",
+          temperature: 0.7,
+          maxTokens: 2048,
+          systemPrompt: настройкиData.systemPrompt,
+          messageLimit: 50,
+          moderationEnabled: true,
+          autoRespond: true,
+          responseDelay: 1.5
+        });
+      }
     }
-  }, []);
+  }, [настройкиData]);
 
   // Обработчик тестирования настроек
   const обработчикТестирования = useCallback(() => {
-    console.log("Тестирование текущих настроек AI...");
-  }, []);
+    testSettingsMutation.mutate({
+      тестовоеСообщение: "Привет! Расскажи кратко о проектах Кирилла.",
+      модель: настройки.model as "llama3-8b-8192" | "llama3-70b-8192" | "mixtral-8x7b-32768"
+    });
+  }, [настройки.model, testSettingsMutation]);
+
+  // Если данные загружаются, показываем индикатор загрузки
+  if (загрузкаНастроек) {
+    return (
+      <div className="space-y-6">
+        <div className="bg-subtle border border-line rounded-lg bevel p-12 text-center">
+          <div className="text-6xl mb-4 opacity-50">⏳</div>
+          <h3 className="text-xl font-bold text-base mb-2">Загрузка настроек AI</h3>
+          <p className="text-soft">Получение текущих настроек с сервера...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -314,22 +370,28 @@ export function AiChatSettings() {
                 <span className="font-mono text-neon uppercase">{настройки.provider}</span>
               </div>
               <div className="flex justify-between p-3 bg-panel rounded border border-line">
-                <span className="text-soft">API запросов сегодня:</span>
-                <span className="font-mono text-cyan">1,247</span>
-              </div>
-              <div className="flex justify-between p-3 bg-panel rounded border border-line">
-                <span className="text-soft">Токенов потрачено:</span>
-                <span className="font-mono text-purple-400">48,392</span>
-              </div>
-              <div className="flex justify-between p-3 bg-panel rounded border border-line">
-                <span className="text-soft">Среднее время ответа:</span>
-                <span className="font-mono text-yellow-400">
-                  {настройки.provider === "groq" ? "0.8с" : "2.3с"}
+                <span className="text-soft">Статус API:</span>
+                <span className={`font-mono ${настройкиData?.статусAPI?.доступен ? 'text-green-400' : 'text-red-400'}`}>
+                  {настройкиData?.статусAPI?.доступен ? '🟢 Доступен' : '🔴 Недоступен'}
                 </span>
               </div>
               <div className="flex justify-between p-3 bg-panel rounded border border-line">
-                <span className="text-soft">Успешных ответов:</span>
-                <span className="font-mono text-green-400">99.2%</span>
+                <span className="text-soft">Задержка API:</span>
+                <span className="font-mono text-cyan">
+                  {настройкиData?.статусAPI?.задержка || 0}ms
+                </span>
+              </div>
+              <div className="flex justify-between p-3 bg-panel rounded border border-line">
+                <span className="text-soft">Доступных моделей:</span>
+                <span className="font-mono text-purple-400">
+                  {настройкиData?.доступныеМодели ? Object.keys(настройкиData.доступныеМодели).length : 0}
+                </span>
+              </div>
+              <div className="flex justify-between p-3 bg-panel rounded border border-line">
+                <span className="text-soft">Текущая модель:</span>
+                <span className="font-mono text-yellow-400 text-xs">
+                  {настройки.model}
+                </span>
               </div>
             </div>
           </div>

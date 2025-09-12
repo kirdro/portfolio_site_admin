@@ -136,14 +136,13 @@ export default function ProjectsPage() {
         />
 
         {/* Форма редактирования/создания проекта */}
-        {(selectedProject || isCreating) && (
-          <ProjectForm
-            project={selectedProject}
-            isCreating={isCreating}
-            onClose={обработчикЗакрытияФормы}
-            onSave={обработчикСохраненияПроекта}
-          />
-        )}
+        <ProjectForm
+          project={selectedProject}
+          isCreating={isCreating}
+          isOpen={!!(selectedProject || isCreating)}
+          onClose={обработчикЗакрытияФормы}
+          onSave={обработчикСохраненияПроекта}
+        />
       </div>
     </AdminLayout>
   );

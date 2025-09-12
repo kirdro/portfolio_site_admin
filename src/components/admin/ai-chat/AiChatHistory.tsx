@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { api } from "../../../utils/api";
 
 interface Диалог {
   id: string;
@@ -30,85 +31,77 @@ export function AiChatHistory() {
   const [фильтрСтатуса, setФильтрСтатуса] = useState<"all" | "active" | "completed" | "blocked">("all");
   const [поискПользователя, setПоискПользователя] = useState("");
 
-  // Mock данные диалогов
-  const диалоги: Диалог[] = [
-    {
-      id: "1",
-      пользователь: "Анна Петрова",
-      email: "anna@example.com",
-      avatar: "https://i.pravatar.cc/40?img=1",
-      последнееСообщение: "Спасибо за информацию о проектах!",
-      количествоСообщений: 12,
-      статус: "completed",
-      времяСоздания: "2024-09-05 14:30",
-      последняяАктивность: "2024-09-06 09:15"
-    },
-    {
-      id: "2", 
-      пользователь: "Михаил Сидоров",
-      email: "mikhail@test.com",
-      avatar: "https://i.pravatar.cc/40?img=2",
-      последнееСообщение: "Какие технологии используются в последних проектах?",
-      количествоСообщений: 8,
-      статус: "active",
-      времяСоздания: "2024-09-06 10:45",
-      последняяАктивность: "2024-09-06 14:22"
-    },
-    {
-      id: "3",
-      пользователь: "Елена Козлова", 
-      email: "elena@blocked.com",
-      avatar: "https://i.pravatar.cc/40?img=3",
-      последнееСообщение: "Неподходящее содержимое...",
-      количествоСообщений: 3,
-      статус: "blocked",
-      времяСоздания: "2024-09-06 11:20",
-      последняяАктивность: "2024-09-06 11:30"
-    },
-    {
-      id: "4",
-      пользователь: "Дмитрий Волков",
-      email: "dmitry@company.com", 
-      avatar: "https://i.pravatar.cc/40?img=4",
-      последнееСообщение: "Интересно узнать больше о навыках в DevOps",
-      количествоСообщений: 15,
-      статус: "active",
-      времяСоздания: "2024-09-05 16:00",
-      последняяАктивность: "2024-09-06 13:45"
-    }
-  ];
+  // Получаем реальные диалоги из БД
+  const { data: диалогиData, isLoading: загрузкаДиалогов } = api.aiChat.getAllDialogs.useQuery({
+    status: фильтрСтатуса,
+    search: поискПользователя || undefined,
+    page: 1,
+    limit: 50,
+  });
 
-  // Mock данные сообщений для выбранного диалога
-  const сообщенияДиалога: Record<string, Сообщение[]> = {
-    "1": [
-      {
-        id: "msg1",
-        отправитель: "user",
-        содержимое: "Привет! Можешь рассказать о проектах Кирилла?",
-        времяОтправки: "14:30"
-      },
-      {
-        id: "msg2", 
-        отправитель: "ai",
-        содержимое: "Привет! С радостью расскажу о проектах. У Кирилла есть несколько интересных разработок в области веб-разработки, включая этот портфолио сайт с киберпанк дизайном.",
-        времяОтправки: "14:31"
-      },
-      {
-        id: "msg3",
-        отправитель: "user", 
-        содержимое: "Спасибо за информацию о проектах!",
-        времяОтправки: "09:15"
-      }
-    ],
-    "2": [
-      {
-        id: "msg4",
-        отправитель: "user",
-        содержимое: "Какие технологии используются в последних проектах?",
-        времяОтправки: "14:22"
-      }
-    ]
-  };
+  // Получаем выбранный диалог с сообщениями
+  const { data: выбранныйДиалогData, isLoading: загрузкаСообщений } = api.aiChat.getDialogById.useQuery(
+    { id: выбранныйДиалог! },
+    { enabled: !!выбранныйДиалог }
+  );
+
+  // Мутации для управления диалогами
+  const blockUserMutation = api.aiChat.blockUser.useMutation({
+    onSuccess: () => {
+      alert("Пользователь заблокирован в AI чате");
+      // Обновляем данные
+    },
+    onError: (error) => {
+      alert(`Ошибка блокировки: ${error.message}`);
+    }
+  });
+
+  const exportDialogMutation = api.aiChat.exportDialog.useMutation({
+    onSuccess: (результат) => {
+      // Создаем и скачиваем файл
+      const blob = new Blob([результат.содержимое], { 
+        type: результат.файл.endsWith('.json') ? 'application/json' : 'text/plain' 
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = результат.файл;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+    onError: (error) => {
+      alert(`Ошибка экспорта: ${error.message}`);
+    }
+  });
+
+  // Преобразуем данные из БД к формату интерфейса
+  const диалоги: Диалог[] = (диалогиData?.диалоги || []).map(dialog => ({
+    id: dialog.id,
+    пользователь: dialog.пользователь.имя,
+    email: dialog.пользователь.email,
+    avatar: dialog.пользователь.аватар,
+    последнееСообщение: dialog.последнееСообщение,
+    количествоСообщений: dialog.количествоСообщений,
+    статус: dialog.статус,
+    времяСоздания: new Date(dialog.времяСоздания).toLocaleString("ru-RU"),
+    последняяАктивность: new Date(dialog.последняяАктивность).toLocaleString("ru-RU"),
+  }));
+
+  // Сообщения выбранного диалога
+  const сообщенияДиалога: Record<string, Сообщение[]> = выбранныйДиалогData ? {
+    [выбранныйДиалог!]: выбранныйДиалогData.сообщения.map(msg => ({
+      id: msg.id,
+      отправитель: msg.отправитель,
+      содержимое: msg.содержимое,
+      времяОтправки: new Date(msg.времяОтправки).toLocaleTimeString("ru-RU", { 
+        hour: "2-digit", 
+        minute: "2-digit" 
+      }),
+    }))
+  } : {};
+
 
   // Фильтрация диалогов
   const отфильтрованныеДиалоги = диалоги.filter(диалог => {
@@ -128,14 +121,20 @@ export function AiChatHistory() {
   // Обработчик блокировки пользователя
   const обработчикБлокировки = useCallback((id: string) => {
     if (confirm("Заблокировать пользователя в AI чате?")) {
-      console.log("Блокировка пользователя:", id);
+      blockUserMutation.mutate({
+        пользовательId: id,
+        причина: "Заблокирован администратором через интерфейс AI чата"
+      });
     }
-  }, []);
+  }, [blockUserMutation]);
 
   // Обработчик экспорта диалога
   const обработчикЭкспорта = useCallback((id: string, format: "json" | "txt" | "csv") => {
-    console.log(`Экспорт диалога ${id} в формате ${format}`);
-  }, []);
+    exportDialogMutation.mutate({
+      диалогId: id,
+      формат: format
+    });
+  }, [exportDialogMutation]);
 
   // Получение стиля статуса
   const получитьСтильСтатуса = useCallback((статус: string) => {
@@ -203,7 +202,12 @@ export function AiChatHistory() {
           </div>
           
           <div className="max-h-96 overflow-y-auto">
-            {отфильтрованныеДиалоги.map((диалог) => (
+            {загрузкаДиалогов ? (
+              <div className="p-8 text-center text-soft">
+                <div className="text-4xl mb-2">⏳</div>
+                <div>Загрузка диалогов...</div>
+              </div>
+            ) : отфильтрованныеДиалоги.map((диалог) => (
               <div
                 key={диалог.id}
                 onClick={() => обработчикВыбораДиалога(диалог.id)}
@@ -318,7 +322,12 @@ export function AiChatHistory() {
               </div>
               
               <div className="h-96 overflow-y-auto p-4 space-y-4">
-                {(сообщенияДиалога[выбранныйДиалог] || []).map((сообщение) => (
+                {загрузкаСообщений ? (
+                  <div className="text-center text-soft py-8">
+                    <div className="text-4xl mb-2">⏳</div>
+                    <div>Загрузка сообщений...</div>
+                  </div>
+                ) : (сообщенияДиалога[выбранныйДиалог] || []).map((сообщение) => (
                   <div
                     key={сообщение.id}
                     className={`flex ${сообщение.отправитель === "user" ? "justify-start" : "justify-end"}`}

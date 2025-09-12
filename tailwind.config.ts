@@ -12,19 +12,28 @@ const config: Config = {
       colors: {
         // Фоновые цвета
         bg: "#0B0D0E",
-        "bg-subtle": "#0F1214",
-        "bg-hover": "#1A1F22",
+        subtle: "#0F1214",
+        panel: "#0F1214",
+        hover: "#1A1F22",
         
         // Текстовые цвета
-        "text-base": "#E6F4EF",
-        "text-subtle": "#B8C5C0",
+        base: "#E6F4EF",
+        soft: "#B8C5C0",
         
         // Неоновые акценты
-        "neon-green": "#00FF99",
-        "neon-cyan": "#00FFCC",
+        neon: "#00FF99",
+        cyan: "#00FFCC",
         
         // Границы и линии
-        "line": "#1C2A25",
+        line: "#1C2A25",
+        
+        // Дополнительные алиасы для совместимости
+        "bg-subtle": "#0F1214",
+        "bg-hover": "#1A1F22",
+        "text-base": "#E6F4EF",
+        "text-subtle": "#B8C5C0",
+        "neon-green": "#00FF99",
+        "neon-cyan": "#00FFCC",
       },
       
       // Шрифты

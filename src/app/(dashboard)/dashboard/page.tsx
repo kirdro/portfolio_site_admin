@@ -1,14 +1,12 @@
 "use client";
 
-import AdminLayout from "../../components/AdminLayout";
-import { api } from '../../utils/api';
+import { api } from '../../../utils/api';
 
 export default function DashboardPage() {
   // Подключаем реальную статистику из БД
   const { data: статистика, isLoading } = api.admin.getStats.useQuery();
 
   return (
-    <AdminLayout>
       <div className="space-y-6">
         {/* Заголовок Dashboard */}
         <div className="text-center">
@@ -148,6 +146,5 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
   );
 }

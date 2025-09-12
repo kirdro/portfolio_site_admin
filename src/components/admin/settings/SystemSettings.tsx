@@ -1,11 +1,19 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import type { SettingsData } from "../../../app/(dashboard)/settings/page";
+import { api } from "../../../utils/api";
+
+interface SystemSettingsData {
+  siteName: string;
+  siteDescription: string;
+  maintenanceMode: boolean;
+  allowRegistration: boolean;
+  maxFileSize: number;
+  timezone: string;
+  language: string;
+}
 
 interface SystemSettingsProps {
-  settings: SettingsData;
-  onSave: (updatedSettings: Partial<SettingsData>) => void;
   onRestart: () => void;
 }
 
@@ -14,16 +22,46 @@ interface SystemSettingsProps {
  * Конфигурация сайта, режимы работы, лимиты
  */
 export function SystemSettings({ 
-  settings, 
-  onSave,
   onRestart 
 }: SystemSettingsProps) {
 
-  const [формаНастроек, setФормаНастроек] = useState<SettingsData>(settings);
   const [сохранение, setСохранение] = useState(false);
 
+  // Загружаем настройки из API
+  const { data: settings, isLoading, refetch } = api.settings.getSystemSettings.useQuery();
+  
+  // Создаем локальное состояние формы
+  const [формаНастроек, setФормаНастроек] = useState<SystemSettingsData>({
+    siteName: "Kirdro Portfolio Admin",
+    siteDescription: "Административная панель портфолио",
+    maintenanceMode: false,
+    allowRegistration: false,
+    maxFileSize: 10,
+    timezone: "Europe/Moscow",
+    language: "ru",
+  });
+
+  // Обновляем форму при загрузке данных
+  React.useEffect(() => {
+    if (settings) {
+      setФормаНастроек(settings);
+    }
+  }, [settings]);
+
+  // Мутация для сохранения настроек
+  const saveSettingsMutation = api.settings.setSystemSettings.useMutation({
+    onSuccess: () => {
+      void refetch();
+      setСохранение(false);
+    },
+    onError: (error) => {
+      console.error("Ошибка сохранения настроек:", error);
+      setСохранение(false);
+    },
+  });
+
   // Обработчик изменения значений формы
-  const обработчикИзменения = useCallback((field: keyof SettingsData, value: any) => {
+  const обработчикИзменения = useCallback((field: keyof SystemSettingsData, value: any) => {
     setФормаНастроек(prev => ({
       ...prev,
       [field]: value
@@ -31,22 +69,27 @@ export function SystemSettings({
   }, []);
 
   // Обработчик сохранения настроек
-  const обработчикСохранения = useCallback(async () => {
+  const обработчикСохранения = useCallback(() => {
     setСохранение(true);
-    try {
-      await onSave(формаНастроек);
-      // Здесь можно показать уведомление об успехе
-    } catch (error) {
-      console.error("Ошибка сохранения настроек:", error);
-    } finally {
-      setСохранение(false);
-    }
-  }, [формаНастроек, onSave]);
+    saveSettingsMutation.mutate(формаНастроек);
+  }, [формаНастроек, saveSettingsMutation]);
 
   // Обработчик сброса к исходным значениям
   const обработчикСброса = useCallback(() => {
-    setФормаНастроек(settings);
+    if (settings) {
+      setФормаНастроек(settings);
+    }
   }, [settings]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-neon text-lg">
+          ⏳ Загрузка настроек...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -73,15 +116,19 @@ export function SystemSettings({
 
           <div>
             <label className="block text-sm font-medium text-soft mb-2">
-              Email администратора
+              Часовой пояс
             </label>
-            <input
-              type="email"
-              value={формаНастроек.adminEmail}
-              onChange={(e) => обработчикИзменения('adminEmail', e.target.value)}
+            <select
+              value={формаНастроек.timezone}
+              onChange={(e) => обработчикИзменения('timezone', e.target.value)}
               className="w-full px-4 py-2 bg-panel border border-line rounded text-base
-                       focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
-            />
+                       focus:border-neon transition-colors"
+            >
+              <option value="Europe/Moscow">🇷🇺 Москва (UTC+3)</option>
+              <option value="Europe/London">🇬🇧 Лондон (UTC+0)</option>
+              <option value="America/New_York">🇺🇸 Нью-Йорк (UTC-5)</option>
+              <option value="Asia/Tokyo">🇯🇵 Токио (UTC+9)</option>
+            </select>
           </div>
 
           <div className="md:col-span-2">
@@ -104,13 +151,28 @@ export function SystemSettings({
             </label>
             <select
               value={формаНастроек.language}
-              onChange={(e) => обработчикИзменения('language', e.target.value as "ru" | "en")}
+              onChange={(e) => обработчикИзменения('language', e.target.value)}
               className="w-full px-4 py-2 bg-panel border border-line rounded text-base
                        focus:border-neon transition-colors"
             >
               <option value="ru">🇷🇺 Русский</option>
               <option value="en">🇺🇸 English</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-soft mb-2">
+              Максимальный размер файла (MB)
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="100"
+              value={формаНастроек.maxFileSize}
+              onChange={(e) => обработчикИзменения('maxFileSize', parseInt(e.target.value))}
+              className="w-full px-4 py-2 bg-panel border border-line rounded text-base
+                       focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
+            />
           </div>
         </div>
       </div>
@@ -143,69 +205,9 @@ export function SystemSettings({
                              peer-checked:bg-neon"></div>
               </label>
             </div>
-
-            <div className="flex items-center justify-between p-3 bg-panel rounded border border-line">
-              <div>
-                <div className="font-medium text-base">Режим отладки</div>
-                <div className="text-sm text-soft">Подробные логи ошибок</div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={формаНастроек.debugMode}
-                  onChange={(e) => обработчикИзменения('debugMode', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer
-                             peer-checked:after:translate-x-full peer-checked:after:border-white 
-                             after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                             after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
-                             peer-checked:bg-yellow-400"></div>
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-3 bg-panel rounded border border-line">
-              <div>
-                <div className="font-medium text-base">Темная тема</div>
-                <div className="text-sm text-soft">Киберпанк дизайн</div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={формаНастроек.darkMode}
-                  onChange={(e) => обработчикИзменения('darkMode', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer
-                             peer-checked:after:translate-x-full peer-checked:after:border-white 
-                             after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                             after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
-                             peer-checked:bg-purple-400"></div>
-              </label>
-            </div>
           </div>
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-panel rounded border border-line">
-              <div>
-                <div className="font-medium text-base">Email уведомления</div>
-                <div className="text-sm text-soft">Отправка системных писем</div>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={формаНастроек.emailNotifications}
-                  onChange={(e) => обработчикИзменения('emailNotifications', e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer
-                             peer-checked:after:translate-x-full peer-checked:after:border-white 
-                             after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                             after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all
-                             peer-checked:bg-cyan"></div>
-              </label>
-            </div>
-
             <div className="flex items-center justify-between p-3 bg-panel rounded border border-line">
               <div>
                 <div className="font-medium text-base">Регистрация пользователей</div>
@@ -229,61 +231,6 @@ export function SystemSettings({
         </div>
       </div>
 
-      {/* Лимиты и ограничения */}
-      <div className="bg-subtle border border-line rounded-lg bevel p-6">
-        <h3 className="text-lg font-bold text-base mb-4 flex items-center space-x-2">
-          <span>📊</span>
-          <span>Лимиты и ограничения</span>
-        </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-soft mb-2">
-              Максимальный размер файла (MB)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={формаНастроек.maxFileUploadSize}
-              onChange={(e) => обработчикИзменения('maxFileUploadSize', parseInt(e.target.value))}
-              className="w-full px-4 py-2 bg-panel border border-line rounded text-base
-                       focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-soft mb-2">
-              Время сессии (минуты)
-            </label>
-            <input
-              type="number"
-              min="15"
-              max="1440"
-              value={формаНастроек.sessionTimeout}
-              onChange={(e) => обработчикИзменения('sessionTimeout', parseInt(e.target.value))}
-              className="w-full px-4 py-2 bg-panel border border-line rounded text-base
-                       focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-soft mb-2">
-              Частота бекапов
-            </label>
-            <select
-              value={формаНастроек.backupFrequency}
-              onChange={(e) => обработчикИзменения('backupFrequency', e.target.value as "daily" | "weekly" | "monthly")}
-              className="w-full px-4 py-2 bg-panel border border-line rounded text-base
-                       focus:border-neon transition-colors"
-            >
-              <option value="daily">📅 Ежедневно</option>
-              <option value="weekly">📆 Еженедельно</option>
-              <option value="monthly">🗓️ Ежемесячно</option>
-            </select>
-          </div>
-        </div>
-      </div>
 
       {/* Кнопки управления */}
       <div className="flex items-center justify-between p-4 bg-panel border border-line rounded-lg bevel">

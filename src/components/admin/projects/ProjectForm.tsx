@@ -3,10 +3,13 @@ import { z } from "zod";
 import type { ProjectData } from "../../../app/(dashboard)/projects/page";
 import { ImageUpload } from "../shared/ImageUpload";
 import { api } from "../../../utils/api";
+import { Modal, ModalHeader, ModalBody, ModalFooter } from "../../ui/Modal";
+import { useToasts } from "../../ui/Toast";
 
 interface ProjectFormProps {
   project?: ProjectData | null;
   isCreating: boolean;
+  isOpen: boolean;
   onClose: () => void;
   onSave: () => void;
 }
@@ -26,26 +29,30 @@ const projectSchema = z.object({
  * Форма создания/редактирования проекта
  * Поддержка валидации, загрузки изображений и управления тегами
  */
-export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFormProps) {
+export function ProjectForm({ project, isCreating, isOpen, onClose, onSave }: ProjectFormProps) {
+  
+  const { success, error: showError } = useToasts();
   
   // Подключаем tRPC мутации
   const createMutation = api.admin.projects.create.useMutation({
     onSuccess: () => {
+      success("Проект создан", "Новый проект успешно добавлен в портфолио");
       onSave();
     },
     onError: (error) => {
       console.error("Ошибка создания проекта:", error);
-      alert(`Ошибка: ${error.message}`);
+      showError("Ошибка создания", error.message);
     }
   });
 
   const updateMutation = api.admin.projects.update.useMutation({
     onSuccess: () => {
+      success("Проект обновлен", "Изменения успешно сохранены");
       onSave();
     },
     onError: (error) => {
       console.error("Ошибка обновления проекта:", error);
-      alert(`Ошибка: ${error.message}`);
+      showError("Ошибка обновления", error.message);
     }
   });
   
@@ -198,23 +205,13 @@ export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFor
   }, [formData, isCreating, project, createMutation, updateMutation, валидироватьФорму]);
 
   return (
-    <div className="fixed inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-      <div className="bg-panel border border-line rounded-lg bevel max-w-2xl w-full max-h-[90vh] overflow-auto shadow-2xl shadow-neon/10">
-        <div className="p-6">
-          {/* Заголовок формы */}
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-neon glyph-glow">
-              {isCreating ? "➕ Создать проект" : "✏️ Редактировать проект"}
-            </h2>
-            <button
-              onClick={onClose}
-              className="text-soft hover:text-base transition-colors"
-            >
-              ✕
-            </button>
-          </div>
-
-          <form onSubmit={обработчикОтправки} className="space-y-6">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isCreating ? "➕ Создать проект" : "✏️ Редактировать проект"}
+      size="lg"
+    >
+      <form onSubmit={обработчикОтправки} className="space-y-6">
             {/* Название */}
             <div>
               <label className="block text-sm font-medium text-base mb-2">
@@ -385,31 +382,28 @@ export function ProjectForm({ project, isCreating, onClose, onSave }: ProjectFor
               </label>
             </div>
 
-            {/* Кнопки действий */}
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={createMutation.isLoading || updateMutation.isLoading}
-                className="flex-1 px-4 py-2 bg-neon/20 border border-neon text-neon
-                         hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
-                         disabled:opacity-50 disabled:cursor-not-allowed
-                         bevel transition-all duration-300"
-              >
-                {(createMutation.isLoading || updateMutation.isLoading) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 bg-subtle border border-line text-base
-                         hover:border-soft rounded-md
-                         transition-colors"
-              >
-                Отмена
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
+        {/* Кнопки действий */}
+        <ModalFooter>
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-4 py-2 bg-subtle border border-line text-base
+                     hover:border-soft rounded-md transition-colors"
+          >
+            Отмена
+          </button>
+          <button
+            type="submit"
+            disabled={createMutation.isLoading || updateMutation.isLoading}
+            className="px-6 py-2 bg-neon/20 border border-neon text-neon
+                     hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     bevel transition-all duration-300"
+          >
+            {(createMutation.isLoading || updateMutation.isLoading) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
+          </button>
+        </ModalFooter>
+      </form>
+    </Modal>
   );
 }

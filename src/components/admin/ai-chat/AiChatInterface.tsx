@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
+import { api } from "../../../utils/api";
 
 interface Сообщение {
   id: string;
@@ -28,6 +29,30 @@ export function AiChatInterface() {
   const [выбраннаяМодель, setВыбраннаяМодель] = useState("llama-3.3-70b-versatile");
   const [провайдер, setПровайдер] = useState("groq");
 
+  // tRPC мутация для тестирования настроек AI
+  const testSettingsMutation = api.aiChat.testSettings.useMutation({
+    onSuccess: (результат) => {
+      const ответAI: Сообщение = {
+        id: Date.now().toString(),
+        sender: "ai",
+        content: результат.ответAI,
+        timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+      };
+      setСообщения(prev => [...prev, ответAI]);
+      setОтправка(false);
+    },
+    onError: (error) => {
+      const ответAI: Сообщение = {
+        id: Date.now().toString(),
+        sender: "ai",
+        content: `Ошибка: ${error.message}`,
+        timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
+      };
+      setСообщения(prev => [...prev, ответAI]);
+      setОтправка(false);
+    }
+  });
+
   // Обработчик отправки сообщения
   const обработчикОтправки = useCallback(async () => {
     if (!текстСообщения.trim() || отправка) return;
@@ -43,19 +68,16 @@ export function AiChatInterface() {
     setТекстСообщения("");
     setОтправка(true);
 
-    // Симуляция ответа AI (временно до создания tRPC endpoint)
-    setTimeout(() => {
-      const ответAI: Сообщение = {
-        id: (Date.now() + 1).toString(),
-        sender: "ai",
-        content: `Спасибо за сообщение! Тестирую модель ${выбраннаяМодель} от провайдера ${провайдер.toUpperCase()}. В реальной версии здесь будет интегрирован ${провайдер === "groq" ? "Groq" : "OpenAI"} API через tRPC endpoint.`,
-        timestamp: new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" })
-      };
+    // Реальный вызов tRPC для тестирования AI
+    const модель = выбраннаяМодель.includes('llama') || выбраннаяМодель.includes('gemma') || выбраннаяМодель.includes('deepseek') 
+      ? выбраннаяМодель as "llama3-8b-8192" | "llama3-70b-8192" | "mixtral-8x7b-32768"
+      : "llama3-8b-8192";
       
-      setСообщения(prev => [...prev, ответAI]);
-      setОтправка(false);
-    }, 2000);
-  }, [текстСообщения, отправка, выбраннаяМодель, провайдер]);
+    testSettingsMutation.mutate({
+      тестовоеСообщение: текстСообщения.trim(),
+      модель
+    });
+  }, [текстСообщения, отправка, выбраннаяМодель, testSettingsMutation]);
 
   // Обработчик Enter в поле ввода
   const обработчикEnter = useCallback((e: React.KeyboardEvent) => {

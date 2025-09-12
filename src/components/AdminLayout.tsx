@@ -4,6 +4,7 @@ import { useSession, signOut } from "next-auth/react";
 import { type ReactNode, useState } from "react";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
+import { ToastContainer, useToasts } from "./ui/Toast";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -12,6 +13,7 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const { data: session, status } = useSession();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const toastApi = useToasts();
 
   // Показываем загрузку
   if (status === "loading") {
@@ -62,6 +64,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
         </div>
       </div>
+      
+      {/* Toast уведомления */}
+      <ToastContainer
+        toasts={toastApi.toasts}
+        onRemove={toastApi.removeToast}
+      />
     </div>
   );
 }
