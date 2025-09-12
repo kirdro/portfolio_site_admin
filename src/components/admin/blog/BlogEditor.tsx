@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
-import { PartialBlock } from "@blocknote/core";
+import { type PartialBlock } from "@blocknote/core";
 import { useBlogAI } from "../../../hooks/useBlogAI";
 import "@blocknote/core/fonts/inter.css";
 import "@blocknote/mantine/style.css";

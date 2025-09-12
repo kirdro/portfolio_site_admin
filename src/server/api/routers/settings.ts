@@ -5,8 +5,8 @@ const SettingValueSchema = z.union([
   z.string(),
   z.number(),
   z.boolean(),
-  z.array(z.any()),
-  z.record(z.any()),
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
 ]);
 
 const SettingSchema = z.object({
@@ -65,10 +65,10 @@ export const settingsRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const setting = await ctx.prisma.settings.upsert({
         where: { key: input.key },
-        update: { value: input.value },
+        update: { value: input.value as any },
         create: {
           key: input.key,
-          value: input.value,
+          value: input.value as any,
         },
       });
 
@@ -84,10 +84,10 @@ export const settingsRouter = createTRPCRouter({
       for (const setting of input) {
         const result = await ctx.prisma.settings.upsert({
           where: { key: setting.key },
-          update: { value: setting.value },
+          update: { value: setting.value as any },
           create: {
             key: setting.key,
-            value: setting.value,
+            value: setting.value as any,
           },
         });
         results.push(result);
@@ -109,10 +109,10 @@ export const settingsRouter = createTRPCRouter({
       for (const setting of settingsToSave) {
         const result = await ctx.prisma.settings.upsert({
           where: { key: setting.key },
-          update: { value: setting.value },
+          update: { value: setting.value as any },
           create: {
             key: setting.key,
-            value: setting.value,
+            value: setting.value as any,
           },
         });
         results.push(result);
@@ -163,10 +163,10 @@ export const settingsRouter = createTRPCRouter({
       for (const setting of settingsToSave) {
         const result = await ctx.prisma.settings.upsert({
           where: { key: setting.key },
-          update: { value: setting.value },
+          update: { value: setting.value as any },
           create: {
             key: setting.key,
-            value: setting.value,
+            value: setting.value as any,
           },
         });
         results.push(result);

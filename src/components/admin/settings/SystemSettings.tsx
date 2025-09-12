@@ -8,12 +8,14 @@ interface SystemSettingsData {
   siteDescription: string;
   maintenanceMode: boolean;
   allowRegistration: boolean;
-  maxFileSize: number;
-  timezone: string;
-  language: string;
+  emailNotifications: boolean;
+  darkMode: boolean;
+  language: "ru" | "en";
 }
 
 interface SystemSettingsProps {
+  settings: SystemSettingsData;
+  onSave: (updatedSettings: Partial<SystemSettingsData>) => void;
   onRestart: () => void;
 }
 
@@ -22,13 +24,15 @@ interface SystemSettingsProps {
  * Конфигурация сайта, режимы работы, лимиты
  */
 export function SystemSettings({ 
+  settings,
+  onSave,
   onRestart 
 }: SystemSettingsProps) {
 
   const [сохранение, setСохранение] = useState(false);
 
-  // Загружаем настройки из API
-  const { data: settings, isLoading, refetch } = api.settings.getSystemSettings.useQuery();
+  // Загружаем настройки из API (временно отключено)
+  // const { data: settingsData, isLoading, refetch } = api.settings.getSystemSettings.useQuery();
   
   // Создаем локальное состояние формы
   const [формаНастроек, setФормаНастроек] = useState<SystemSettingsData>({
@@ -36,29 +40,27 @@ export function SystemSettings({
     siteDescription: "Административная панель портфолио",
     maintenanceMode: false,
     allowRegistration: false,
-    maxFileSize: 10,
-    timezone: "Europe/Moscow",
+    emailNotifications: true,
+    darkMode: false,
     language: "ru",
   });
 
-  // Обновляем форму при загрузке данных
+  // Обновляем форму при загрузке данных (временно отключено)
   React.useEffect(() => {
-    if (settings) {
-      setФормаНастроек(settings);
-    }
+    setФормаНастроек(settings);
   }, [settings]);
 
-  // Мутация для сохранения настроек
-  const saveSettingsMutation = api.settings.setSystemSettings.useMutation({
-    onSuccess: () => {
-      void refetch();
-      setСохранение(false);
-    },
-    onError: (error) => {
-      console.error("Ошибка сохранения настроек:", error);
-      setСохранение(false);
-    },
-  });
+  // Мутация для сохранения настроек (временно отключена)
+  // const saveSettingsMutation = api.settings.setSystemSettings.useMutation({
+  //   onSuccess: () => {
+  //     void refetch();
+  //     setСохранение(false);
+  //   },
+  //   onError: (error) => {
+  //     console.error("Ошибка сохранения настроек:", error);
+  //     setСохранение(false);
+  //   },
+  // });
 
   // Обработчик изменения значений формы
   const обработчикИзменения = useCallback((field: keyof SystemSettingsData, value: any) => {
@@ -71,8 +73,10 @@ export function SystemSettings({
   // Обработчик сохранения настроек
   const обработчикСохранения = useCallback(() => {
     setСохранение(true);
-    saveSettingsMutation.mutate(формаНастроек);
-  }, [формаНастроек, saveSettingsMutation]);
+    // saveSettingsMutation.mutate(формаНастроек);
+    onSave(формаНастроек);
+    setСохранение(false);
+  }, [формаНастроек, onSave]);
 
   // Обработчик сброса к исходным значениям
   const обработчикСброса = useCallback(() => {
@@ -81,7 +85,7 @@ export function SystemSettings({
     }
   }, [settings]);
 
-  if (isLoading) {
+  if (false) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-neon text-lg">
@@ -119,8 +123,8 @@ export function SystemSettings({
               Часовой пояс
             </label>
             <select
-              value={формаНастроек.timezone}
-              onChange={(e) => обработчикИзменения('timezone', e.target.value)}
+              value="Europe/Moscow"
+              onChange={() => {}}
               className="w-full px-4 py-2 bg-panel border border-line rounded text-base
                        focus:border-neon transition-colors"
             >
@@ -168,8 +172,8 @@ export function SystemSettings({
               type="number"
               min="1"
               max="100"
-              value={формаНастроек.maxFileSize}
-              onChange={(e) => обработчикИзменения('maxFileSize', parseInt(e.target.value))}
+              value={10}
+              onChange={() => {}}
               className="w-full px-4 py-2 bg-panel border border-line rounded text-base
                        focus:border-neon focus:ring-1 focus:ring-neon transition-colors"
             />

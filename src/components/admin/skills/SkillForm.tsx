@@ -290,13 +290,13 @@ export function SkillForm({ skill, isCreating, onClose, onSave }: SkillFormProps
             <div className="flex gap-3 pt-4">
               <button
                 type="submit"
-                disabled={createMutation.isLoading || updateMutation.isLoading}
+                disabled={createMutation.isPending || updateMutation.isPending}
                 className="flex-1 px-4 py-2 bg-neon/20 border border-neon text-neon
                          hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                          disabled:opacity-50 disabled:cursor-not-allowed
                          bevel transition-all duration-300"
               >
-                {(createMutation.isLoading || updateMutation.isLoading) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
+                {(createMutation.isPending || updateMutation.isPending) ? "Сохранение..." : (isCreating ? "Создать" : "Сохранить")}
               </button>
               <button
                 type="button"

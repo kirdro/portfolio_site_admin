@@ -28,7 +28,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="text-3xl font-bold font-mono" style={{color: '#00FF99'}}>
-              {isLoading ? "..." : статистика?.totalUsers || 0}
+              {isLoading ? "..." : статистика?.users.total || 0}
             </div>
             <div className="text-sm" style={{color: '#B8C5C0'}}>
               Пользователей
@@ -43,7 +43,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="text-3xl font-bold font-mono" style={{color: '#00FF99'}}>
-              {isLoading ? "..." : статистика?.totalProjects || 0}
+              {isLoading ? "..." : статистика?.projects.total || 0}
             </div>
             <div className="text-sm" style={{color: '#B8C5C0'}}>
               Проектов
@@ -58,7 +58,7 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="text-3xl font-bold font-mono" style={{color: '#00FF99'}}>
-              {isLoading ? "..." : статистика?.totalMessages || 0}
+              {isLoading ? "..." : (статистика ? статистика.messages.general + статистика.messages.ai : 0)}
             </div>
             <div className="text-sm" style={{color: '#B8C5C0'}}>
               Сообщений

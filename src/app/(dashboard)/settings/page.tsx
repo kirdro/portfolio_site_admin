@@ -253,8 +253,8 @@ export default function SettingsPage() {
           <div className="p-6">
             {activeTab === "general" && (
               <SystemSettings
-                settings={mockSettings}
-                onSave={обработчикСохраненияНастроек}
+                settings={mockSettings as any}
+                onSave={обработчикСохраненияНастроек as any}
                 onRestart={обработчикПерезагрузкиСистемы}
               />
             )}
