@@ -13,6 +13,9 @@ RUN bun install --frozen-lockfile --ignore-scripts
 FROM oven/bun:1 AS builder
 WORKDIR /app
 
+# Устанавливаем OpenSSL для Prisma
+RUN apt-get update -y && apt-get install -y openssl
+
 # Копируем node_modules из deps
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -36,8 +39,8 @@ RUN bun run build
 FROM oven/bun:1-slim AS runner
 WORKDIR /app
 
-# Устанавливаем curl для healthcheck
-RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+# Устанавливаем curl для healthcheck и openssl для Prisma
+RUN apt-get update && apt-get install -y curl openssl && rm -rf /var/lib/apt/lists/*
 
 # Runtime переменные
 ENV NODE_ENV=production
