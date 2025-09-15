@@ -2,160 +2,165 @@
 
 /* Базовый неоновый стиль */
 .neon-icon {
-  color: #00FF99 !important;
-  filter: drop-shadow(0 0 5px #00FF99) drop-shadow(0 0 10px #00FF99) drop-shadow(0 0 15px #00FF99);
-  transition: all 0.3s ease;
+	color: #00ff99 !important;
+	filter: drop-shadow(0 0 5px #00ff99) drop-shadow(0 0 10px #00ff99)
+		drop-shadow(0 0 15px #00ff99);
+	transition: all 0.3s ease;
 }
 
 .neon-icon:hover {
-  color: #00FFCC !important;
-  filter: drop-shadow(0 0 8px #00FFCC) drop-shadow(0 0 15px #00FFCC) drop-shadow(0 0 25px #00FFCC);
-  transform: scale(1.1);
+	color: #00ffcc !important;
+	filter: drop-shadow(0 0 8px #00ffcc) drop-shadow(0 0 15px #00ffcc)
+		drop-shadow(0 0 25px #00ffcc);
+	transform: scale(1.1);
 }
 
 /* Вариации интенсивности */
 .neon-icon-subtle {
-  color: #00FF99 !important;
-  filter: drop-shadow(0 0 3px #00FF99);
-  transition: all 0.3s ease;
+	color: #00ff99 !important;
+	filter: drop-shadow(0 0 3px #00ff99);
+	transition: all 0.3s ease;
 }
 
 .neon-icon-subtle:hover {
-  color: #00FFCC !important;
-  filter: drop-shadow(0 0 5px #00FFCC);
+	color: #00ffcc !important;
+	filter: drop-shadow(0 0 5px #00ffcc);
 }
 
 .neon-icon-intense {
-  color: #00FF99 !important;
-  filter: drop-shadow(0 0 10px #00FF99) drop-shadow(0 0 20px #00FF99) drop-shadow(0 0 30px #00FF99);
-  transition: all 0.3s ease;
+	color: #00ff99 !important;
+	filter: drop-shadow(0 0 10px #00ff99) drop-shadow(0 0 20px #00ff99)
+		drop-shadow(0 0 30px #00ff99);
+	transition: all 0.3s ease;
 }
 
 .neon-icon-intense:hover {
-  color: #00FFCC !important;
-  filter: drop-shadow(0 0 15px #00FFCC) drop-shadow(0 0 25px #00FFCC) drop-shadow(0 0 35px #00FFCC);
-  transform: scale(1.15);
+	color: #00ffcc !important;
+	filter: drop-shadow(0 0 15px #00ffcc) drop-shadow(0 0 25px #00ffcc)
+		drop-shadow(0 0 35px #00ffcc);
+	transform: scale(1.15);
 }
 
 /* Пульсирующий эффект */
 .neon-icon-pulse {
-  color: #00FF99 !important;
-  animation: neonPulse 2s ease-in-out infinite alternate;
+	color: #00ff99 !important;
+	animation: neonPulse 2s ease-in-out infinite alternate;
 }
 
 @keyframes neonPulse {
-  from { 
-    filter: drop-shadow(0 0 5px #00FF99) drop-shadow(0 0 10px #00FF99);
-    transform: scale(1);
-  }
-  to { 
-    filter: drop-shadow(0 0 10px #00FFCC) drop-shadow(0 0 20px #00FFCC) drop-shadow(0 0 30px #00FFCC);
-    transform: scale(1.05);
-  }
+	from {
+		filter: drop-shadow(0 0 5px #00ff99) drop-shadow(0 0 10px #00ff99);
+		transform: scale(1);
+	}
+	to {
+		filter: drop-shadow(0 0 10px #00ffcc) drop-shadow(0 0 20px #00ffcc)
+			drop-shadow(0 0 30px #00ffcc);
+		transform: scale(1.05);
+	}
 }
 
 /* Стили для размеров */
 .neon-icon-sm {
-  width: 16px;
-  height: 16px;
+	width: 16px;
+	height: 16px;
 }
 
 .neon-icon-md {
-  width: 20px;
-  height: 20px;
+	width: 20px;
+	height: 20px;
 }
 
 .neon-icon-lg {
-  width: 24px;
-  height: 24px;
+	width: 24px;
+	height: 24px;
 }
 
 .neon-icon-xl {
-  width: 32px;
-  height: 32px;
+	width: 32px;
+	height: 32px;
 }
 
 /* Стили для кнопок с иконками */
 .neon-icon-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: rgba(0, 255, 153, 0.1);
-  border: 1px solid #00FF99;
-  border-radius: 0.375rem;
-  color: #00FF99;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem;
+	background: rgba(0, 255, 153, 0.1);
+	border: 1px solid #00ff99;
+	border-radius: 0.375rem;
+	color: #00ff99;
+	font-weight: 500;
+	transition: all 0.3s ease;
+	cursor: pointer;
 }
 
 .neon-icon-button:hover {
-  background: rgba(0, 255, 204, 0.2);
-  border-color: #00FFCC;
-  color: #00FFCC;
-  box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+	background: rgba(0, 255, 204, 0.2);
+	border-color: #00ffcc;
+	color: #00ffcc;
+	box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
 }
 
 .neon-icon-button .neon-icon {
-  filter: none; /* Убираем дополнительное свечение в кнопках */
+	filter: none; /* Убираем дополнительное свечение в кнопках */
 }
 
 /* Специальные цветовые вариации */
 .neon-icon-cyan {
-  color: #00FFCC !important;
-  filter: drop-shadow(0 0 5px #00FFCC) drop-shadow(0 0 10px #00FFCC);
+	color: #00ffcc !important;
+	filter: drop-shadow(0 0 5px #00ffcc) drop-shadow(0 0 10px #00ffcc);
 }
 
 .neon-icon-cyan:hover {
-  color: #00FF99 !important;
-  filter: drop-shadow(0 0 8px #00FF99) drop-shadow(0 0 15px #00FF99);
+	color: #00ff99 !important;
+	filter: drop-shadow(0 0 8px #00ff99) drop-shadow(0 0 15px #00ff99);
 }
 
 .neon-icon-purple {
-  color: #A855F7 !important;
-  filter: drop-shadow(0 0 5px #A855F7) drop-shadow(0 0 10px #A855F7);
+	color: #a855f7 !important;
+	filter: drop-shadow(0 0 5px #a855f7) drop-shadow(0 0 10px #a855f7);
 }
 
 .neon-icon-purple:hover {
-  color: #C084FC !important;
-  filter: drop-shadow(0 0 8px #C084FC) drop-shadow(0 0 15px #C084FC);
+	color: #c084fc !important;
+	filter: drop-shadow(0 0 8px #c084fc) drop-shadow(0 0 15px #c084fc);
 }
 
 .neon-icon-orange {
-  color: #FF8C00 !important;
-  filter: drop-shadow(0 0 5px #FF8C00) drop-shadow(0 0 10px #FF8C00);
+	color: #ff8c00 !important;
+	filter: drop-shadow(0 0 5px #ff8c00) drop-shadow(0 0 10px #ff8c00);
 }
 
 .neon-icon-orange:hover {
-  color: #FFB84D !important;
-  filter: drop-shadow(0 0 8px #FFB84D) drop-shadow(0 0 15px #FFB84D);
+	color: #ffb84d !important;
+	filter: drop-shadow(0 0 8px #ffb84d) drop-shadow(0 0 15px #ffb84d);
 }
 
 .neon-icon-red {
-  color: #FF4444 !important;
-  filter: drop-shadow(0 0 5px #FF4444) drop-shadow(0 0 10px #FF4444);
+	color: #ff4444 !important;
+	filter: drop-shadow(0 0 5px #ff4444) drop-shadow(0 0 10px #ff4444);
 }
 
 .neon-icon-red:hover {
-  color: #FF6666 !important;
-  filter: drop-shadow(0 0 8px #FF6666) drop-shadow(0 0 15px #FF6666);
+	color: #ff6666 !important;
+	filter: drop-shadow(0 0 8px #ff6666) drop-shadow(0 0 15px #ff6666);
 }
 
 /* Статистические иконки в карточках */
 .stats-icon {
-  font-size: 2rem;
-  opacity: 0.8;
+	font-size: 2rem;
+	opacity: 0.8;
 }
 
 /* Адаптивность */
 @media (max-width: 768px) {
-  .neon-icon {
-    filter: drop-shadow(0 0 3px #00FF99) drop-shadow(0 0 6px #00FF99);
-  }
-  
-  .neon-icon:hover {
-    filter: drop-shadow(0 0 5px #00FFCC) drop-shadow(0 0 10px #00FFCC);
-    transform: scale(1.05);
-  }
+	.neon-icon {
+		filter: drop-shadow(0 0 3px #00ff99) drop-shadow(0 0 6px #00ff99);
+	}
+
+	.neon-icon:hover {
+		filter: drop-shadow(0 0 5px #00ffcc) drop-shadow(0 0 10px #00ffcc);
+		transform: scale(1.05);
+	}
 }

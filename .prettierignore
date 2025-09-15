@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.next/
+.git/
+
+# Generated files
+dist/
+build/
+out/
+src/generated/
+
+# Config files
+*.config.js
+*.config.ts
+*.config.mjs
+
+# Lock files
+bun.lock
+package-lock.json
+yarn.lock
+
+# Environment files
+.env*
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Documentation files that should preserve formatting
+*.md
+
+# Prisma generated files
+prisma/generated/

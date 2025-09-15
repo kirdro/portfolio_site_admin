@@ -1,205 +1,205 @@
 name: 🐳 Docker Deploy to Admin Panel
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
 
 env:
-  DOCKER_IMAGE: kirdro-portfolio-admin
-  DOCKER_TAG: latest
-  CONTAINER_NAME: kirdro-portfolio-admin
+    DOCKER_IMAGE: kirdro-portfolio-admin
+    DOCKER_TAG: latest
+    CONTAINER_NAME: kirdro-portfolio-admin
 
 jobs:
-  # Этап 1: TypeScript и линтинг
-  typecheck:
-    name: ⚡ TypeScript Check (Admin)
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: 📚 Checkout
-        uses: actions/checkout@v4
+    # Этап 1: TypeScript и линтинг
+    typecheck:
+        name: ⚡ TypeScript Check (Admin)
+        runs-on: ubuntu-latest
 
-      - name: 🏗 Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: latest
+        steps:
+            - name: 📚 Checkout
+              uses: actions/checkout@v4
 
-      - name: 📦 Install dependencies
-        run: bun install
+            - name: 🏗 Setup Bun
+              uses: oven-sh/setup-bun@v1
+              with:
+                  bun-version: latest
 
-      - name: 🔍 TypeScript check
-        run: bun run typecheck
+            - name: 📦 Install dependencies
+              run: bun install
 
-      - name: 🧹 Lint check
-        run: SKIP_ENV_VALIDATION=1 bun run lint || echo "Lint warnings detected but continuing..."
+            - name: 🔍 TypeScript check
+              run: bun run typecheck
 
-  # Этап 2: Сборка Docker образа
-  docker-build:
-    name: 🐳 Docker Build (Admin)
-    runs-on: ubuntu-latest
-    needs: typecheck
-    
-    steps:
-      - name: 📚 Checkout
-        uses: actions/checkout@v4
+            - name: 🧹 Lint check
+              run: SKIP_ENV_VALIDATION=1 bun run lint || echo "Lint warnings detected but continuing..."
 
-      - name: 🏗 Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+    # Этап 2: Сборка Docker образа
+    docker-build:
+        name: 🐳 Docker Build (Admin)
+        runs-on: ubuntu-latest
+        needs: typecheck
 
-      - name: 🐳 Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: false
-          load: true
-          tags: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-          build-args: |
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
-            VCS_REF=${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        steps:
+            - name: 📚 Checkout
+              uses: actions/checkout@v4
 
-      - name: 🗜️ Save Docker image
-        run: |
-          echo "💾 Saving Docker image to tar archive..."
-          docker save ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} | gzip > kirdro-admin-docker-image.tar.gz
-          echo "📊 Archive size:"
-          ls -lh kirdro-admin-docker-image.tar.gz
+            - name: 🏗 Set up Docker Buildx
+              uses: docker/setup-buildx-action@v3
 
-      - name: 📤 Upload Docker image
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image-admin
-          path: kirdro-admin-docker-image.tar.gz
-          retention-days: 1
+            - name: 🐳 Build Docker image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ./Dockerfile
+                  push: false
+                  load: true
+                  tags: ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+                  build-args: |
+                      BUILD_DATE=${{ github.event.head_commit.timestamp }}
+                      VCS_REF=${{ github.sha }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
 
-  # Этап 3: Docker Деплой
-  docker-deploy:
-    name: 🐳 Docker Deploy to Admin Panel
-    runs-on: ubuntu-latest
-    needs: [typecheck, docker-build]
-    if: github.ref == 'refs/heads/main'
-    environment: admin
-    
-    steps:
-      - name: 📥 Download Docker image
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image-admin
-          path: .
+            - name: 🗜️ Save Docker image
+              run: |
+                  echo "💾 Saving Docker image to tar archive..."
+                  docker save ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }} | gzip > kirdro-admin-docker-image.tar.gz
+                  echo "📊 Archive size:"
+                  ls -lh kirdro-admin-docker-image.tar.gz
 
-      - name: 🔐 Setup SSH
-        uses: webfactory/ssh-agent@v0.7.0
-        with:
-          ssh-private-key: ${{ secrets.ADMIN_DEPLOY_KEY }}
+            - name: 📤 Upload Docker image
+              uses: actions/upload-artifact@v4
+              with:
+                  name: docker-image-admin
+                  path: kirdro-admin-docker-image.tar.gz
+                  retention-days: 1
 
-      - name: 🐳 Deploy Docker to Admin server
-        run: |
-          echo "🐳 Starting Docker deployment to Admin server..."
-          
-          # Копирование Docker образа на сервер
-          scp -o StrictHostKeyChecking=no kirdro-admin-docker-image.tar.gz ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }}:/tmp/
+    # Этап 3: Docker Деплой
+    docker-deploy:
+        name: 🐳 Docker Deploy to Admin Panel
+        runs-on: ubuntu-latest
+        needs: [typecheck, docker-build]
+        if: github.ref == 'refs/heads/main'
+        environment: admin
 
-          # Docker deployment на сервере
-          ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} '
-            set -e
-            
-            echo "🐳 Starting Docker deployment on Admin server..."
-            
-            # Переходим в Docker директорию
-            cd /var/docker/kirdro-admin
-            
-            # Проверяем диск и память
-            echo "💾 Checking disk space..."
-            df -h /var/docker/
-            echo "🧠 Checking available memory..."
-            free -h
-            
-            # Загружаем новый Docker образ
-            echo "📥 Loading Docker image..."
-            docker load -i /tmp/kirdro-admin-docker-image.tar.gz
-            
-            # Останавливаем старый контейнер если существует
-            echo "🛑 Stopping old Admin container..."
-            if docker ps -a --format "table {{.Names}}" | grep -q "^${{ env.CONTAINER_NAME }}$"; then
-              docker stop ${{ env.CONTAINER_NAME }} || true
-              docker rm ${{ env.CONTAINER_NAME }} || true
-              echo "✅ Old Admin container removed"
-            fi
-            
-            # Запускаем новый контейнер
-            echo "🚀 Starting new Admin Docker container..."
-            docker run -d \
-              --name ${{ env.CONTAINER_NAME }} \
-              --restart unless-stopped \
-              -p 127.0.0.1:3005:3005 \
-              --env-file .env.admin \
-              --memory="1g" \
-              --cpus="1.0" \
-              --health-cmd="curl -f http://localhost:3005/api/health || exit 1" \
-              --health-interval=30s \
-              --health-timeout=10s \
-              --health-retries=3 \
-              --health-start-period=60s \
-              ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
-            
-            echo "✅ New Admin container started successfully!"
-            
-            # Проверяем запущенные контейнеры
-            echo "🔍 Running Admin containers:"
-            docker ps | grep kirdro-admin || echo "❌ Admin Container not found in ps"
-            
-            # Показать логи для диагностики
-            echo "📋 Container startup logs:"
-            timeout 30s docker logs ${{ env.CONTAINER_NAME }} || echo "Timeout waiting for logs"
-            
-            # Очистка старых образов (оставляем только последний)
-            echo "🧹 Cleaning old Docker images..."
-            docker image prune -f
-            
-            # Очистка временного файла
-            rm -f /tmp/kirdro-admin-docker-image.tar.gz
-            
-            echo "🎉 Admin Docker deployment completed successfully!"
-          '
+        steps:
+            - name: 📥 Download Docker image
+              uses: actions/download-artifact@v4
+              with:
+                  name: docker-image-admin
+                  path: .
 
-      - name: 🔍 Admin Health Check
-        run: |
-          echo "⏳ Waiting for Admin container startup..."
-          sleep 45
-          
-          # Проверяем API endpoint через HTTP
-          echo "🩺 Checking Admin API health endpoint..."
-          for i in {1..8}; do
-            response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://admin.kirdro.ru/api/health || echo "000")
-            if [ "$response" = "200" ]; then
-              echo "✅ Admin API Health check passed (HTTP $response)"
-              exit 0
-            else
-              echo "⏳ Admin API Health attempt $i: HTTP $response, retrying in 15s..."
-              sleep 15
-            fi
-          done
-          
-          echo "❌ Admin API Health check failed after all attempts"
-          echo "🔍 Let's check container status..."
-          ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} "docker ps | grep kirdro-admin && echo '--- Container logs ---' && docker logs kirdro-portfolio-admin --tail 50"
-          exit 1
+            - name: 🔐 Setup SSH
+              uses: webfactory/ssh-agent@v0.7.0
+              with:
+                  ssh-private-key: ${{ secrets.ADMIN_DEPLOY_KEY }}
 
-  # Этап 4: Уведомления
-  notify:
-    name: 📢 Admin Deployment Notifications  
-    runs-on: ubuntu-latest
-    needs: [docker-deploy]
-    if: always()
-    steps:
-      - name: 🎉 Success Notification
-        if: needs.docker-deploy.result == 'success'
-        run: echo "🎉 Admin panel deployment to https://admin.kirdro.ru completed successfully! 🐳"
-        
-      - name: 💥 Failure Notification  
-        if: needs.docker-deploy.result == 'failure'
-        run: echo "💥 Admin panel deployment failed! Check the logs and container status."
+            - name: 🐳 Deploy Docker to Admin server
+              run: |
+                  echo "🐳 Starting Docker deployment to Admin server..."
+
+                  # Копирование Docker образа на сервер
+                  scp -o StrictHostKeyChecking=no kirdro-admin-docker-image.tar.gz ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }}:/tmp/
+
+                  # Docker deployment на сервере
+                  ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} '
+                    set -e
+                    
+                    echo "🐳 Starting Docker deployment on Admin server..."
+                    
+                    # Переходим в Docker директорию
+                    cd /var/docker/kirdro-admin
+                    
+                    # Проверяем диск и память
+                    echo "💾 Checking disk space..."
+                    df -h /var/docker/
+                    echo "🧠 Checking available memory..."
+                    free -h
+                    
+                    # Загружаем новый Docker образ
+                    echo "📥 Loading Docker image..."
+                    docker load -i /tmp/kirdro-admin-docker-image.tar.gz
+                    
+                    # Останавливаем старый контейнер если существует
+                    echo "🛑 Stopping old Admin container..."
+                    if docker ps -a --format "table {{.Names}}" | grep -q "^${{ env.CONTAINER_NAME }}$"; then
+                      docker stop ${{ env.CONTAINER_NAME }} || true
+                      docker rm ${{ env.CONTAINER_NAME }} || true
+                      echo "✅ Old Admin container removed"
+                    fi
+                    
+                    # Запускаем новый контейнер
+                    echo "🚀 Starting new Admin Docker container..."
+                    docker run -d \
+                      --name ${{ env.CONTAINER_NAME }} \
+                      --restart unless-stopped \
+                      -p 127.0.0.1:3005:3005 \
+                      --env-file .env.admin \
+                      --memory="1g" \
+                      --cpus="1.0" \
+                      --health-cmd="curl -f http://localhost:3005/api/health || exit 1" \
+                      --health-interval=30s \
+                      --health-timeout=10s \
+                      --health-retries=3 \
+                      --health-start-period=60s \
+                      ${{ env.DOCKER_IMAGE }}:${{ env.DOCKER_TAG }}
+                    
+                    echo "✅ New Admin container started successfully!"
+                    
+                    # Проверяем запущенные контейнеры
+                    echo "🔍 Running Admin containers:"
+                    docker ps | grep kirdro-admin || echo "❌ Admin Container not found in ps"
+                    
+                    # Показать логи для диагностики
+                    echo "📋 Container startup logs:"
+                    timeout 30s docker logs ${{ env.CONTAINER_NAME }} || echo "Timeout waiting for logs"
+                    
+                    # Очистка старых образов (оставляем только последний)
+                    echo "🧹 Cleaning old Docker images..."
+                    docker image prune -f
+                    
+                    # Очистка временного файла
+                    rm -f /tmp/kirdro-admin-docker-image.tar.gz
+                    
+                    echo "🎉 Admin Docker deployment completed successfully!"
+                  '
+
+            - name: 🔍 Admin Health Check
+              run: |
+                  echo "⏳ Waiting for Admin container startup..."
+                  sleep 45
+
+                  # Проверяем API endpoint через HTTP
+                  echo "🩺 Checking Admin API health endpoint..."
+                  for i in {1..8}; do
+                    response=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 https://admin.kirdro.ru/api/health || echo "000")
+                    if [ "$response" = "200" ]; then
+                      echo "✅ Admin API Health check passed (HTTP $response)"
+                      exit 0
+                    else
+                      echo "⏳ Admin API Health attempt $i: HTTP $response, retrying in 15s..."
+                      sleep 15
+                    fi
+                  done
+
+                  echo "❌ Admin API Health check failed after all attempts"
+                  echo "🔍 Let's check container status..."
+                  ssh -o StrictHostKeyChecking=no ${{ secrets.ADMIN_DEPLOY_USER }}@${{ secrets.ADMIN_DEPLOY_HOST }} "docker ps | grep kirdro-admin && echo '--- Container logs ---' && docker logs kirdro-portfolio-admin --tail 50"
+                  exit 1
+
+    # Этап 4: Уведомления
+    notify:
+        name: 📢 Admin Deployment Notifications
+        runs-on: ubuntu-latest
+        needs: [docker-deploy]
+        if: always()
+        steps:
+            - name: 🎉 Success Notification
+              if: needs.docker-deploy.result == 'success'
+              run: echo "🎉 Admin panel deployment to https://admin.kirdro.ru completed successfully! 🐳"
+
+            - name: 💥 Failure Notification
+              if: needs.docker-deploy.result == 'failure'
+              run: echo "💥 Admin panel deployment failed! Check the logs and container status."

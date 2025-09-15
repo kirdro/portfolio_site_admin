@@ -1,0 +1,535 @@
+/* Киберпанк анимации для системы загрузки */
+
+/* Базовые переменные */
+:root {
+	--neon-green: #00ff99;
+	--neon-cyan: #00ffcc;
+	--cyber-red: #ff0066;
+	--cyber-purple: #9d4edd;
+	--glow-shadow:
+		0 0 10px var(--neon-green), 0 0 20px var(--neon-green) 40,
+		0 0 30px var(--neon-green) 20;
+}
+
+/* Пульсация для ожидания */
+@keyframes cyber-pulse {
+	0%,
+	100% {
+		opacity: 1;
+		transform: scale(1);
+		filter: brightness(1) saturate(1);
+	}
+	50% {
+		opacity: 0.7;
+		transform: scale(1.05);
+		filter: brightness(1.2) saturate(1.5);
+		box-shadow: var(--glow-shadow);
+	}
+}
+
+.cyber-pulse {
+	animation: cyber-pulse 2s ease-in-out infinite;
+}
+
+/* Сканирование для поиска */
+@keyframes cyber-scan {
+	0% {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+	10%,
+	90% {
+		opacity: 1;
+	}
+	100% {
+		transform: translateX(400%);
+		opacity: 0;
+	}
+}
+
+.cyber-scan::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		rgba(0, 255, 153, 0.3) 25%,
+		rgba(0, 255, 204, 0.5) 50%,
+		rgba(0, 255, 153, 0.3) 75%,
+		transparent 100%
+	);
+	animation: cyber-scan 3s linear infinite;
+	pointer-events: none;
+}
+
+/* Загрузка данных */
+@keyframes cyber-load {
+	0% {
+		background-position: -200px 0;
+		opacity: 0.8;
+	}
+	50% {
+		opacity: 1;
+		filter: hue-rotate(30deg);
+	}
+	100% {
+		background-position: 200px 0;
+		opacity: 0.8;
+	}
+}
+
+.cyber-load {
+	background: linear-gradient(
+		90deg,
+		transparent 25%,
+		rgba(0, 255, 153, 0.2) 50%,
+		transparent 75%
+	);
+	background-size: 200px 100%;
+	animation: cyber-load 1.5s ease-in-out infinite;
+}
+
+/* Сохранение */
+@keyframes cyber-save {
+	0% {
+		transform: scale(1) rotate(0deg);
+		box-shadow: 0 0 5px var(--neon-green);
+	}
+	25% {
+		transform: scale(1.1) rotate(1deg);
+		box-shadow:
+			0 0 15px var(--neon-green),
+			0 0 25px var(--neon-cyan);
+	}
+	50% {
+		transform: scale(1.05) rotate(-0.5deg);
+		box-shadow:
+			0 0 20px var(--neon-cyan),
+			0 0 30px var(--neon-green);
+	}
+	75% {
+		transform: scale(1.1) rotate(0.5deg);
+		box-shadow:
+			0 0 15px var(--neon-green),
+			0 0 25px var(--neon-cyan);
+	}
+	100% {
+		transform: scale(1) rotate(0deg);
+		box-shadow: 0 0 5px var(--neon-green);
+	}
+}
+
+.cyber-save {
+	animation: cyber-save 0.8s ease-in-out;
+}
+
+/* Glitch эффект для критических операций */
+@keyframes cyber-glitch {
+	0%,
+	100% {
+		transform: translate(0);
+		filter: hue-rotate(0deg);
+	}
+	10% {
+		transform: translate(-2px, 1px);
+		filter: hue-rotate(90deg);
+	}
+	20% {
+		transform: translate(-1px, -1px);
+		filter: hue-rotate(180deg);
+	}
+	30% {
+		transform: translate(1px, 1px);
+		filter: hue-rotate(270deg);
+	}
+	40% {
+		transform: translate(1px, -1px);
+		filter: hue-rotate(180deg);
+	}
+	50% {
+		transform: translate(-1px, 1px);
+		filter: hue-rotate(90deg);
+	}
+	60% {
+		transform: translate(-1px, 1px);
+		filter: hue-rotate(0deg);
+	}
+	70% {
+		transform: translate(1px, 1px);
+		filter: hue-rotate(270deg);
+	}
+	80% {
+		transform: translate(-1px, -1px);
+		filter: hue-rotate(180deg);
+	}
+	90% {
+		transform: translate(1px, -1px);
+		filter: hue-rotate(90deg);
+	}
+}
+
+.cyber-glitch {
+	animation: cyber-glitch 0.3s ease-in-out;
+}
+
+.cyber-glitch-critical {
+	animation: cyber-glitch 0.2s ease-in-out infinite;
+}
+
+/* Сканлайны для фоновых процессов */
+@keyframes cyber-scanlines {
+	0% {
+		background-position: 0 0;
+	}
+	100% {
+		background-position: 0 50px;
+	}
+}
+
+.cyber-scanlines {
+	position: relative;
+}
+
+.cyber-scanlines::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: repeating-linear-gradient(
+		90deg,
+		transparent,
+		transparent 2px,
+		rgba(0, 255, 153, 0.03) 2px,
+		rgba(0, 255, 153, 0.03) 4px
+	);
+	animation: cyber-scanlines 2s linear infinite;
+	pointer-events: none;
+}
+
+/* Неоновое свечение */
+.neon-glow {
+	text-shadow:
+		0 0 5px var(--neon-green),
+		0 0 10px var(--neon-green),
+		0 0 15px var(--neon-green),
+		0 0 20px var(--neon-green);
+	box-shadow:
+		0 0 5px var(--neon-green),
+		0 0 10px var(--neon-green),
+		0 0 15px var(--neon-green),
+		inset 0 0 5px var(--neon-green) 40;
+}
+
+.neon-glow-cyan {
+	text-shadow:
+		0 0 5px var(--neon-cyan),
+		0 0 10px var(--neon-cyan),
+		0 0 15px var(--neon-cyan),
+		0 0 20px var(--neon-cyan);
+	box-shadow:
+		0 0 5px var(--neon-cyan),
+		0 0 10px var(--neon-cyan),
+		0 0 15px var(--neon-cyan),
+		inset 0 0 5px var(--neon-cyan) 40;
+}
+
+/* Эффект матрицы для загрузки */
+@keyframes matrix-rain {
+	0% {
+		transform: translateY(-100%);
+		opacity: 1;
+	}
+	100% {
+		transform: translateY(100vh);
+		opacity: 0;
+	}
+}
+
+.matrix-rain {
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	z-index: 9999;
+}
+
+.matrix-rain::before {
+	content: '01101001 01110100 01110011 01110010';
+	position: absolute;
+	top: -50px;
+	left: 10%;
+	color: var(--neon-green);
+	font-family: 'Courier New', monospace;
+	font-size: 12px;
+	opacity: 0.3;
+	animation: matrix-rain 3s linear infinite;
+	animation-delay: 0s;
+}
+
+.matrix-rain::after {
+	content: '01100011 01111001 01100010 01100101';
+	position: absolute;
+	top: -50px;
+	left: 80%;
+	color: var(--neon-cyan);
+	font-family: 'Courier New', monospace;
+	font-size: 10px;
+	opacity: 0.2;
+	animation: matrix-rain 4s linear infinite;
+	animation-delay: 1s;
+}
+
+/* Holographic эффект */
+@keyframes holographic {
+	0%,
+	100% {
+		background-position: 0% 50%;
+		filter: hue-rotate(0deg);
+	}
+	50% {
+		background-position: 100% 50%;
+		filter: hue-rotate(60deg);
+	}
+}
+
+.holographic {
+	background: linear-gradient(
+		45deg,
+		rgba(0, 255, 153, 0.1),
+		rgba(0, 255, 204, 0.1),
+		rgba(153, 77, 221, 0.1),
+		rgba(255, 0, 102, 0.1)
+	);
+	background-size: 400% 400%;
+	animation: holographic 3s ease infinite;
+}
+
+/* Энергетический щит */
+@keyframes energy-shield {
+	0% {
+		box-shadow:
+			0 0 10px var(--neon-green),
+			inset 0 0 10px var(--neon-green) 20;
+	}
+	50% {
+		box-shadow:
+			0 0 20px var(--neon-cyan),
+			0 0 30px var(--neon-green) 50,
+			inset 0 0 15px var(--neon-cyan) 30;
+	}
+	100% {
+		box-shadow:
+			0 0 10px var(--neon-green),
+			inset 0 0 10px var(--neon-green) 20;
+	}
+}
+
+.energy-shield {
+	border: 1px solid var(--neon-green) 50;
+	animation: energy-shield 2s ease-in-out infinite;
+}
+
+/* Специальные классы для разных состояний */
+.loading-critical {
+	animation:
+		cyber-glitch-critical 0.5s ease-in-out infinite,
+		cyber-pulse 1s ease-in-out infinite;
+}
+
+.loading-normal {
+	animation: cyber-pulse 2s ease-in-out infinite;
+}
+
+.loading-background {
+	animation: cyber-scanlines 3s linear infinite;
+	opacity: 0.7;
+}
+
+.loading-upload {
+	animation:
+		cyber-scan 2s linear infinite,
+		energy-shield 1.5s ease-in-out infinite;
+}
+
+.loading-complete {
+	animation:
+		cyber-save 1s ease-in-out,
+		neon-glow 0.5s ease-in-out;
+}
+
+/* Адаптивные размеры - Мобильная версия */
+@media (max-width: 768px) {
+	.cyber-pulse {
+		animation-duration: 1.5s;
+	}
+
+	.cyber-scan::after {
+		animation-duration: 2s;
+	}
+
+	.neon-glow,
+	.neon-glow-cyan {
+		text-shadow:
+			0 0 3px currentColor,
+			0 0 6px currentColor,
+			0 0 9px currentColor;
+		box-shadow:
+			0 0 3px currentColor,
+			0 0 6px currentColor,
+			inset 0 0 3px currentColor;
+	}
+
+	/* Упрощенные анимации для экономии батареи */
+	.loading-critical {
+		animation: cyber-pulse 1s ease-in-out infinite;
+	}
+
+	.loading-normal {
+		animation: cyber-pulse 1.5s ease-in-out infinite;
+	}
+
+	.loading-background {
+		animation: none; /* Отключаем сложные анимации на мобильных */
+		opacity: 0.5;
+	}
+
+	/* Уменьшенные размеры спиннеров */
+	.dna-wrapper {
+		transform: scale(0.8);
+	}
+
+	/* Touch-friendly индикаторы */
+	.cyber-button {
+		min-height: 44px;
+		min-width: 44px;
+	}
+}
+
+/* Планшетная версия */
+@media (min-width: 769px) and (max-width: 1024px) {
+	.cyber-pulse {
+		animation-duration: 1.8s;
+	}
+
+	.neon-glow,
+	.neon-glow-cyan {
+		text-shadow:
+			0 0 4px currentColor,
+			0 0 8px currentColor,
+			0 0 12px currentColor,
+			0 0 16px currentColor;
+		box-shadow:
+			0 0 4px currentColor,
+			0 0 8px currentColor,
+			0 0 12px currentColor,
+			inset 0 0 4px currentColor;
+	}
+
+	/* Средние размеры */
+	.dna-wrapper {
+		transform: scale(0.9);
+	}
+
+	/* Оптимизированное расположение */
+	.loading-overlay {
+		padding: 2rem;
+	}
+}
+
+/* Десктоп версия - полные анимации */
+@media (min-width: 1025px) {
+	.cyber-pulse {
+		animation-duration: 2s;
+	}
+
+	.neon-glow,
+	.neon-glow-cyan {
+		text-shadow:
+			0 0 5px currentColor,
+			0 0 10px currentColor,
+			0 0 15px currentColor,
+			0 0 20px currentColor,
+			0 0 25px currentColor;
+		box-shadow:
+			0 0 5px currentColor,
+			0 0 10px currentColor,
+			0 0 15px currentColor,
+			0 0 20px currentColor,
+			inset 0 0 5px currentColor;
+	}
+
+	/* Полноценные анимации */
+	.loading-critical {
+		animation:
+			cyber-glitch-critical 0.5s ease-in-out infinite,
+			cyber-pulse 1s ease-in-out infinite,
+			neon-glow 2s ease-in-out infinite;
+	}
+
+	.loading-upload {
+		animation:
+			cyber-scan 2s linear infinite,
+			energy-shield 1.5s ease-in-out infinite,
+			holographic 3s ease infinite;
+	}
+
+	/* Детальная информация о процессах */
+	.loading-details {
+		display: block;
+	}
+
+	/* Дополнительные эффекты для десктопа */
+	.matrix-rain {
+		display: block;
+	}
+
+	.cyber-scanlines {
+		display: block;
+	}
+}
+
+/* Специальные медиа-запросы для производительности */
+@media (prefers-reduced-motion: reduce) {
+	.cyber-pulse,
+	.cyber-scan,
+	.cyber-load,
+	.cyber-save,
+	.cyber-glitch,
+	.cyber-glitch-critical,
+	.cyber-scanlines,
+	.matrix-rain,
+	.holographic,
+	.energy-shield {
+		animation: none;
+	}
+
+	.loading-critical,
+	.loading-normal,
+	.loading-background,
+	.loading-upload,
+	.loading-complete {
+		animation: none;
+	}
+}
+
+/* Низкая производительность устройства */
+@media (max-resolution: 1dppx) {
+	.cyber-glitch-critical,
+	.loading-critical {
+		animation: cyber-pulse 2s ease-in-out infinite;
+	}
+
+	.matrix-rain,
+	.cyber-scanlines,
+	.holographic {
+		display: none;
+	}
+}

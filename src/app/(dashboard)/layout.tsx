@@ -1,9 +1,14 @@
-import AdminLayout from "../../components/AdminLayout";
+import AdminLayout from '../../components/AdminLayout';
+import { LoadingProvider } from '../../contexts/LoadingContext';
 
 export default function DashboardLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  return <AdminLayout>{children}</AdminLayout>;
+	return (
+		<LoadingProvider>
+			<AdminLayout>{children}</AdminLayout>
+		</LoadingProvider>
+	);
 }

@@ -1,24 +1,24 @@
-import { createTRPCRouter } from "./trpc";
-import { adminRouter } from "./routers/admin";
-import { chatRouter } from "./routers/chat";
-import { contactsRouter } from "./routers/contacts";
-import { aiChatRouter } from "./routers/aiChat";
-import { blogRouter } from "./routers/blog-simple";
-import { settingsRouter } from "./routers/settings";
-import { filesRouter } from "./routers/files";
+import { createTRPCRouter } from './trpc';
+import { adminRouter } from './routers/admin';
+import { chatRouter } from './routers/chat';
+import { contactsRouter } from './routers/contacts';
+import { aiChatRouter } from './routers/aiChat';
+import { blogRouter } from './routers/blog-simple';
+import { settingsRouter } from './routers/settings';
+import { filesRouter } from './routers/files';
 
 /**
  * Главный tRPC роутер для админ-панели
  * Здесь объединяются все sub-роутеры приложения
  */
 export const appRouter = createTRPCRouter({
-  admin: adminRouter,
-  chat: chatRouter,
-  contacts: contactsRouter,
-  aiChat: aiChatRouter,
-  blog: blogRouter,
-  settings: settingsRouter,
-  files: filesRouter,
+	admin: adminRouter,
+	chat: chatRouter,
+	contacts: contactsRouter,
+	aiChat: aiChatRouter,
+	blog: blogRouter,
+	settings: settingsRouter,
+	files: filesRouter,
 });
 
 // Экспортируем типы роутера для использования на клиенте
