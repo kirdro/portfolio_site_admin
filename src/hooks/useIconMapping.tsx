@@ -42,6 +42,7 @@ import {
 	FaArrowDown,
 	FaArrowLeft,
 	FaArrowRight,
+	FaChrome,
 	FaEye,
 	FaEyeSlash,
 	FaHeart,
@@ -95,7 +96,7 @@ import {
 	SiSlack,
 	SiTrello,
 	SiJira,
-	SiChrome,
+	// FaChrome, // Не существует, используем FaChrome
 	SiFirefox,
 	SiSafari,
 	SiAuth0,
@@ -115,7 +116,7 @@ import {
 	TbPlugConnected,
 	TbCloudComputing,
 	TbWebhook,
-	TbCloudData,
+	// TbCloud, // Не существует, используем TbCloud
 	TbServer2,
 	TbDatabase,
 	TbBrandGraphql,
@@ -127,7 +128,7 @@ import {
 	TbPhone,
 	TbPhoneCall,
 	TbVideo,
-	TbVideoCameraOff,
+	// TbCameraOff, // Не существует, используем TbCameraOff
 	TbBroadcast,
 	TbWifi,
 	TbDeviceDesktopAnalytics,
@@ -137,17 +138,20 @@ import {
 	TbBrandRedux,
 	TbBrandNextjs,
 	TbBrandVite,
-	TbBrandWebpack,
+	// SiWebpack, // Не существует, используем SiWebpack
 	TbBrandNpm,
 	TbBrandYarn,
 	TbPackage,
+	TbCloud,
+	TbCameraOff,
+	TbPlug,
 	TbPackages,
 } from 'react-icons/tb';
 import {
 	MdHttp,
 	MdHttps,
 	MdApi,
-	MdWebSocket,
+	// TbPlug, // Не существует, используем TbPlug
 	MdCloud,
 	MdCloudSync,
 	MdSync,
@@ -213,7 +217,7 @@ import {
 	MdCancel,
 	MdHelpOutline,
 	MdLightbulb,
-	MdTips,
+	// MdLightbulb, // Не существует, используем MdLightbulb
 	MdEmojiObjects,
 } from 'react-icons/md';
 
@@ -293,7 +297,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'SiSlack': SiSlack,
 	'SiTrello': SiTrello,
 	'SiJira': SiJira,
-	'SiChrome': SiChrome,
+	'FaChrome': FaChrome,
 	'SiFirefox': SiFirefox,
 	'SiSafari': SiSafari,
 	'SiAuth0': SiAuth0,
@@ -313,7 +317,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'TbPlugConnected': TbPlugConnected,
 	'TbCloudComputing': TbCloudComputing,
 	'TbWebhook': TbWebhook,
-	'TbCloudData': TbCloudData,
+	'TbCloud': TbCloud,
 	'TbServer2': TbServer2,
 	'TbDatabase': TbDatabase,
 	'TbBrandGraphql': TbBrandGraphql,
@@ -325,7 +329,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'TbPhone': TbPhone,
 	'TbPhoneCall': TbPhoneCall,
 	'TbVideo': TbVideo,
-	'TbVideoCameraOff': TbVideoCameraOff,
+	'TbCameraOff': TbCameraOff,
 	'TbBroadcast': TbBroadcast,
 	'TbWifi': TbWifi,
 	'TbDeviceDesktopAnalytics': TbDeviceDesktopAnalytics,
@@ -335,7 +339,6 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'TbBrandRedux': TbBrandRedux,
 	'TbBrandNextjs': TbBrandNextjs,
 	'TbBrandVite': TbBrandVite,
-	'TbBrandWebpack': TbBrandWebpack,
 	'TbBrandNpm': TbBrandNpm,
 	'TbBrandYarn': TbBrandYarn,
 	'TbPackage': TbPackage,
@@ -345,7 +348,7 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'MdHttp': MdHttp,
 	'MdHttps': MdHttps,
 	'MdApi': MdApi,
-	'MdWebSocket': MdWebSocket,
+	'TbPlug': TbPlug,
 	'MdCloud': MdCloud,
 	'MdCloudSync': MdCloudSync,
 	'MdSync': MdSync,
@@ -411,7 +414,6 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'MdCancel': MdCancel,
 	'MdHelpOutline': MdHelpOutline,
 	'MdLightbulb': MdLightbulb,
-	'MdTips': MdTips,
 	'MdEmojiObjects': MdEmojiObjects,
 
 	// Маппинг эмодзи и названий на иконки
@@ -487,11 +489,11 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'api': TbApi,
 	'API': TbApi,
 
-	'🔌': MdWebSocket,
-	'websocket': MdWebSocket,
-	'WebSocket': MdWebSocket,
-	'WebSockets': MdWebSocket,
-	'ws': MdWebSocket,
+	'🔌': TbPlug,
+	'websocket': TbPlug,
+	'WebSocket': TbPlug,
+	'WebSockets': TbPlug,
+	'ws': TbPlug,
 
 	'⚡🔌': TbPlugConnected,
 	'🚀🔌': TbPlugConnected,
@@ -515,15 +517,15 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 	'Webhooks': TbWebhook,
 
 	// React API библиотеки
-	'react query': TbCloudData,
-	'React Query': TbCloudData,
-	'ReactQuery': TbCloudData,
-	'tanstack query': TbCloudData,
-	'TanStack Query': TbCloudData,
+	'react query': TbCloud,
+	'React Query': TbCloud,
+	'ReactQuery': TbCloud,
+	'tanstack query': TbCloud,
+	'TanStack Query': TbCloud,
 
-	'swr': TbCloudData,
-	'SWR': TbCloudData,
-	'useSWR': TbCloudData,
+	'swr': TbCloud,
+	'SWR': TbCloud,
+	'useSWR': TbCloud,
 
 	'react router': FaCode,
 	'React Router': FaCode,
@@ -744,7 +746,7 @@ export function useIconMapping() {
 		// Проверяем без учета регистра для строковых названий
 		const lowerKey = iconKey.toLowerCase();
 		const foundKey = Object.keys(iconMap).find(key => key.toLowerCase() === lowerKey);
-		if (foundKey) {
+		if (foundKey && iconMap[foundKey]) {
 			return iconMap[foundKey];
 		}
 
@@ -797,12 +799,12 @@ export const getAvailableIcons = (): Array<{ key: string; name: string; componen
 		{ key: 'SiGraphql', name: 'GraphQL', component: SiGraphql },
 		{ key: 'TbBrandGraphql', name: 'Apollo GraphQL', component: TbBrandGraphql },
 		{ key: 'TbApi', name: 'gRPC / REST API', component: TbApi },
-		{ key: 'MdWebSocket', name: 'WebSocket', component: MdWebSocket },
+		{ key: 'TbPlug', name: 'WebSocket', component: TbPlug },
 		{ key: 'TbPlugConnected', name: 'Socket.IO', component: TbPlugConnected },
 		{ key: 'TbWebhook', name: 'Webhooks', component: TbWebhook },
 
 		// React экосистема
-		{ key: 'TbCloudData', name: 'React Query / SWR', component: TbCloudData },
+		{ key: 'TbCloud', name: 'React Query / SWR', component: TbCloud },
 		{ key: 'TbBrandRedux', name: 'Redux', component: TbBrandRedux },
 
 		// Аутентификация и безопасность
@@ -851,7 +853,7 @@ export const getAvailableIcons = (): Array<{ key: string; name: string; componen
 		{ key: 'SiMacos', name: 'macOS', component: SiMacos },
 
 		// Браузеры
-		{ key: 'SiChrome', name: 'Chrome', component: SiChrome },
+		{ key: 'FaChrome', name: 'Chrome', component: FaChrome },
 		{ key: 'SiFirefox', name: 'Firefox', component: SiFirefox },
 		{ key: 'SiSafari', name: 'Safari', component: SiSafari },
 

@@ -49,7 +49,7 @@ export default function ProfilePage() {
 				linkedin: profile.linkedin || '',
 				telegram: profile.telegram || '',
 				experienceYears: profile.experienceYears || 0,
-				availability: profile.availability || 'available',
+				availability: (profile.availability as 'available' | 'busy' | 'unavailable') || 'available',
 			});
 		}
 	}, [profile]);
