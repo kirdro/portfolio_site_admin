@@ -4,6 +4,7 @@ import React, { useState, useCallback } from 'react';
 import { api } from '../../../utils/api';
 import { SkillsGrid } from '../../../components/admin/skills/SkillsGrid';
 import { SkillForm } from '../../../components/admin/skills/SkillForm';
+import { DeleteSkillModal } from '../../../components/admin/skills/DeleteSkillModal';
 import { NeonIcon } from '../../../components/ui/NeonIcon';
 import { Spinner, SkeletonLoader } from '../../../components/ui/loaders';
 import {
@@ -18,7 +19,7 @@ import {
 export interface SkillData {
 	id: string;
 	name: string;
-	category: 'Frontend' | 'Backend' | 'DevOps' | 'Tools' | 'Other';
+	category: string; // Динамическая категория из БД
 	level: number; // 1-100
 	icon: string;
 	createdAt: Date;
@@ -35,41 +36,54 @@ export default function SkillsPage() {
 	const [showForm, setShowForm] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
 
+	// Состояние для удаления навыка
+	const [skillToDelete, setSkillToDelete] = useState<SkillData | null>(null);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+
 	// Подключаем реальные данные из БД
 	const {
 		data: skills,
 		isLoading,
-		refetch: обновитьНавыки,
+		refetch: refetchSkills,
 	} = api.admin.skills.getAll.useQuery();
 
 	// Статистика навыков
-	const { data: статистикаНавыков, isLoading: isStatsLoading } =
+	const { data: skillsStats, isLoading: isStatsLoading } =
 		api.admin.skills.getStats.useQuery();
+
+	// API для удаления навыка
+	const deleteSkillMutation = api.admin.skills.delete.useMutation({
+		onSuccess: () => {
+			// Обновляем данные после успешного удаления
+			refetchSkills();
+			setShowDeleteModal(false);
+			setSkillToDelete(null);
+		},
+		onError: (error) => {
+			console.error('Ошибка при удалении навыка:', error);
+			// Здесь можно добавить toast уведомление
+		},
+	});
 
 	// Обрабатываем данные для совместимости с существующими компонентами
 	const mockSkills: SkillData[] = (skills || []).map((skill) => ({
 		...skill,
-		category: skill.category as
-			| 'Frontend'
-			| 'Backend'
-			| 'DevOps'
-			| 'Tools'
-			| 'Other',
+		category: skill.category, // Используем категорию как есть из БД
 		icon: skill.icon || '',
 		createdAt: new Date(),
 		updatedAt: new Date(),
 	}));
-	const статистика = {
-		всего: статистикаНавыков?.totalSkills || 0,
-		поКатегориям: {
-			Frontend: статистикаНавыков?.categoryStats?.Frontend || 0,
-			Backend: статистикаНавыков?.categoryStats?.Backend || 0,
-			DevOps: статистикаНавыков?.categoryStats?.DevOps || 0,
-			Tools: статистикаНавыков?.categoryStats?.Tools || 0,
-			Other: статистикаНавыков?.categoryStats?.Other || 0,
+	const stats = {
+		total: skillsStats?.totalSkills || 0,
+		byCategory: {
+			Frontend: skillsStats?.categoryStats?.Frontend || 0,
+			Backend: skillsStats?.categoryStats?.Backend || 0,
+			DevOps: skillsStats?.categoryStats?.DevOps || 0,
+			Tools: skillsStats?.categoryStats?.Tools || 0,
+			Other: skillsStats?.categoryStats?.Other || 0,
 		},
-		среднийУровень: статистикаНавыков?.averageLevel || 0,
-		экспертныеНавыки: статистикаНавыков?.expertSkills || 0,
+		averageLevel: skillsStats?.averageLevel || 0,
+		expertSkills: skillsStats?.expertSkills || 0,
 	};
 
 	// Временный заглушка массив для обратной совместимости - заменим позже на реальные данные:
@@ -131,34 +145,53 @@ export default function SkillsPage() {
 	];
 
 	// Обработчик клика по навыку для редактирования
-	const обработчикВыбораНавыка = useCallback((skill: SkillData) => {
+	const handleSkillClick = useCallback((skill: SkillData) => {
 		setSelectedSkill(skill);
 		setIsCreating(false);
 		setShowForm(true);
 	}, []);
 
 	// Обработчик создания нового навыка
-	const обработчикСозданияНавыка = useCallback(() => {
+	const handleCreateSkill = useCallback(() => {
 		setSelectedSkill(null);
 		setIsCreating(true);
 		setShowForm(true);
 	}, []);
 
 	// Обработчик закрытия формы
-	const обработчикЗакрытияФормы = useCallback(() => {
+	const handleCloseForm = useCallback(() => {
 		setShowForm(false);
 		setSelectedSkill(null);
 		setIsCreating(false);
 	}, []);
 
 	// Обработчик сохранения навыка
-	const обработчикСохраненияНавыка = useCallback(() => {
+	const handleSaveSkill = useCallback(() => {
 		// Обновляем данные после сохранения
-		обновитьНавыки();
+		refetchSkills();
 		setShowForm(false);
 		setSelectedSkill(null);
 		setIsCreating(false);
-	}, [обновитьНавыки]);
+	}, [refetchSkills]);
+
+	// Обработчик удаления навыка
+	const handleDeleteSkill = useCallback((skill: SkillData) => {
+		setSkillToDelete(skill);
+		setShowDeleteModal(true);
+	}, []);
+
+	// Обработчик подтверждения удаления
+	const handleConfirmDelete = useCallback(() => {
+		if (skillToDelete) {
+			deleteSkillMutation.mutate({ id: skillToDelete.id });
+		}
+	}, [skillToDelete, deleteSkillMutation]);
+
+	// Обработчик закрытия модального окна удаления
+	const handleCloseDeleteModal = useCallback(() => {
+		setShowDeleteModal(false);
+		setSkillToDelete(null);
+	}, []);
 
 	return (
 		<div className='space-y-6'>
@@ -215,7 +248,7 @@ export default function SkillsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-neon glyph-glow'>
-										{статистика.всего}
+										{stats.total}
 									</div>
 									<div className='text-sm text-soft'>
 										Всего навыков
@@ -234,7 +267,7 @@ export default function SkillsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-cyan glyph-glow'>
-										{статистика.среднийУровень}%
+										{stats.averageLevel}%
 									</div>
 									<div className='text-sm text-soft'>
 										Средний уровень
@@ -253,7 +286,7 @@ export default function SkillsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-purple-400 glyph-glow'>
-										{статистика.экспертныеНавыки}
+										{stats.expertSkills}
 									</div>
 									<div className='text-sm text-soft'>
 										Экспертные (90%+)
@@ -274,11 +307,11 @@ export default function SkillsPage() {
 									<div className='text-2xl font-bold text-yellow-400 glyph-glow'>
 										{
 											Object.keys(
-												статистика.поКатегориям,
+												stats.byCategory,
 											).filter(
 												(category) =>
-													статистика.поКатегориям[
-														category as keyof typeof статистика.поКатегориям
+													stats.byCategory[
+														category as keyof typeof stats.byCategory
 													] > 0,
 											).length
 										}
@@ -306,7 +339,7 @@ export default function SkillsPage() {
 						Управление навыками
 					</h2>
 					<div className='flex items-center space-x-2 text-sm text-soft'>
-						{Object.entries(статистика.поКатегориям).map(
+						{Object.entries(stats.byCategory).map(
 							([category, count]) =>
 								count > 0 && (
 									<span
@@ -321,7 +354,7 @@ export default function SkillsPage() {
 				</div>
 
 				<button
-					onClick={обработчикСозданияНавыка}
+					onClick={handleCreateSkill}
 					className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
                      bevel transition-all duration-300'
@@ -347,8 +380,9 @@ export default function SkillsPage() {
 			:	<SkillsGrid
 					skills={mockSkills}
 					loading={isLoading}
-					onSkillClick={обработчикВыбораНавыка}
-					onCreateSkill={обработчикСозданияНавыка}
+					onSkillClick={handleSkillClick}
+					onCreateSkill={handleCreateSkill}
+					onDeleteSkill={handleDeleteSkill}
 				/>
 			}
 
@@ -357,10 +391,19 @@ export default function SkillsPage() {
 				<SkillForm
 					skill={selectedSkill}
 					isCreating={isCreating}
-					onClose={обработчикЗакрытияФормы}
-					onSave={обработчикСохраненияНавыка}
+					onClose={handleCloseForm}
+					onSave={handleSaveSkill}
 				/>
 			)}
+
+			{/* Модальное окно подтверждения удаления */}
+			<DeleteSkillModal
+				skill={skillToDelete}
+				isOpen={showDeleteModal}
+				onClose={handleCloseDeleteModal}
+				onConfirm={handleConfirmDelete}
+				isDeleting={deleteSkillMutation.isPending}
+			/>
 		</div>
 	);
 }

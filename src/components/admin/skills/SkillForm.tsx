@@ -3,39 +3,12 @@
 import React, { useState, useCallback } from 'react';
 import { z } from 'zod';
 import {
-	FaReact,
 	FaPalette,
 	FaCog,
 	FaRocket,
 	FaTools,
 	FaLightbulb,
-	FaJs,
-	FaHtml5,
-	FaCss3Alt,
-	FaVuejs,
-	FaAngular,
-	FaNodeJs,
-	FaPython,
-	FaPhp,
-	FaJava,
-	FaDatabase,
-	FaDocker,
-	FaAws,
-	FaGitAlt,
-	FaCode,
-	FaChartBar,
-	FaLaptopCode,
-	FaGlobe,
-	FaServer,
-	FaLock,
-	FaMobile,
-	FaStar,
-	FaBullseye,
-	FaTrophy,
 	FaBolt,
-	FaGem,
-	FaCloud,
-	FaWrench,
 	FaFile,
 } from 'react-icons/fa';
 import type { SkillData } from '../../../app/(dashboard)/skills/page';
@@ -43,6 +16,7 @@ import { api } from '../../../utils/api';
 import { FileUpload } from '../../ui/FileUpload';
 import { Spinner } from '../../ui/loaders';
 import { NeonIcon } from '../../ui/NeonIcon';
+import { useIconMapping, getAvailableIcons } from '../../../hooks/useIconMapping';
 
 interface SkillFormProps {
 	skill?: SkillData | null;
@@ -67,7 +41,7 @@ const skillSchema = z.object({
 	icon: z
 		.string()
 		.min(1, 'Выберите иконку')
-		.max(10, 'Иконка слишком длинная'),
+		.max(50, 'Иконка слишком длинная'),
 });
 
 /**
@@ -80,6 +54,9 @@ export function SkillForm({
 	onClose,
 	onSave,
 }: SkillFormProps) {
+	// Подключаем систему иконок
+	const { renderIcon, getIcon } = useIconMapping();
+
 	// Подключаем tRPC мутации
 	const createMutation = api.admin.skills.create.useMutation({
 		onSuccess: () => {
@@ -106,7 +83,7 @@ export function SkillForm({
 		name: skill?.name || '',
 		category: skill?.category || ('Frontend' as const),
 		level: skill?.level || 50,
-		icon: skill?.icon || 'bolt',
+		icon: skill?.icon || 'SiReact',
 	});
 
 	const [useCustomIcon, setUseCustomIcon] = useState(false);
@@ -122,38 +99,13 @@ export function SkillForm({
 		{ value: 'Other', label: 'Другое', IconComponent: FaLightbulb },
 	] as const;
 
-	// Популярные иконки для навыков
-	const popularIcons = [
-		{ IconComponent: FaReact, key: 'react', title: 'React' },
-		{ IconComponent: FaJs, key: 'javascript', title: 'JavaScript' },
-		{ IconComponent: FaHtml5, key: 'html5', title: 'HTML5' },
-		{ IconComponent: FaCss3Alt, key: 'css3', title: 'CSS3' },
-		{ IconComponent: FaVuejs, key: 'vue', title: 'Vue.js' },
-		{ IconComponent: FaAngular, key: 'angular', title: 'Angular' },
-		{ IconComponent: FaNodeJs, key: 'nodejs', title: 'Node.js' },
-		{ IconComponent: FaPython, key: 'python', title: 'Python' },
-		{ IconComponent: FaPhp, key: 'php', title: 'PHP' },
-		{ IconComponent: FaJava, key: 'java', title: 'Java' },
-		{ IconComponent: FaDatabase, key: 'database', title: 'База данных' },
-		{ IconComponent: FaDocker, key: 'docker', title: 'Docker' },
-		{ IconComponent: FaAws, key: 'aws', title: 'AWS' },
-		{ IconComponent: FaGitAlt, key: 'git', title: 'Git' },
-		{ IconComponent: FaCode, key: 'code', title: 'Код' },
-		{ IconComponent: FaChartBar, key: 'analytics', title: 'Аналитика' },
-		{ IconComponent: FaLaptopCode, key: 'laptop', title: 'Разработка' },
-		{ IconComponent: FaGlobe, key: 'web', title: 'Веб' },
-		{ IconComponent: FaServer, key: 'server', title: 'Сервер' },
-		{ IconComponent: FaLock, key: 'security', title: 'Безопасность' },
-		{ IconComponent: FaMobile, key: 'mobile', title: 'Мобильные' },
-		{ IconComponent: FaStar, key: 'star', title: 'Звезда' },
-		{ IconComponent: FaBullseye, key: 'target', title: 'Цель' },
-		{ IconComponent: FaTrophy, key: 'trophy', title: 'Достижение' },
-	];
+	// Получаем доступные иконки из системы маппинга
+	const availableIcons = getAvailableIcons();
 
 	// Функция для получения компонента иконки по ключу
 	const getIconComponent = (iconKey: string) => {
-		const iconData = popularIcons.find(icon => icon.key === iconKey);
-		return iconData ? iconData.IconComponent : FaBolt;
+		const IconComponent = getIcon(iconKey);
+		return IconComponent || FaBolt;
 	};
 
 	// Обработчик изменения полей формы
@@ -185,7 +137,7 @@ export function SkillForm({
 		} catch (error) {
 			if (error instanceof z.ZodError) {
 				const newErrors: Record<string, string> = {};
-				(error as any).errors.forEach((err: any) => {
+				error.issues.forEach((err: any) => {
 					if (err.path[0]) {
 						newErrors[err.path[0] as string] = err.message;
 					}
@@ -524,51 +476,139 @@ export function SkillForm({
 									{/* Текущая иконка */}
 									<div className='flex items-center space-x-3 p-3 bg-subtle border border-line rounded-md'>
 										<div className='text-3xl flex items-center justify-center'>
-											<NeonIcon 
-												Icon={getIconComponent(formData.icon)} 
-												size={32} 
-												variant="intense"
-											/>
+											{renderIcon(formData.icon, { size: 32, className: 'text-neon glyph-glow' })}
 										</div>
 										<div>
 											<div className='text-sm font-medium'>
-												Выбрана иконка
+												Выбрана иконка: {formData.icon}
 											</div>
 											<div className='text-xs text-gray-300'>
-												Нажмите на иконку ниже для
-												изменения
+												Нажмите на иконку ниже для изменения
 											</div>
 										</div>
 									</div>
 
-									{/* Популярные иконки */}
-									<div className='grid grid-cols-8 gap-2'>
-										{popularIcons.map((iconData) => (
-											<button
-												key={iconData.key}
-												type='button'
-												onClick={() =>
-													handleFieldChange(
-														'icon',
-														iconData.key,
+									{/* Поиск иконок */}
+									<div className='mb-4'>
+										<input
+											type='text'
+											placeholder='Поиск иконок... (например: react, graphql, websocket)'
+											className='w-full px-3 py-2 bg-subtle border border-line rounded-md text-base
+                                     focus:border-neon focus:ring-1 focus:ring-neon transition-colors'
+											onChange={(e) => {
+												const searchTerm = e.target.value.toLowerCase();
+												// Фильтрация будет происходить в рендере
+											}}
+										/>
+									</div>
+
+									{/* Доступные иконки с группировкой */}
+									<div className='space-y-4 max-h-80 overflow-y-auto'>
+										{/* Популярные/Рекомендуемые */}
+										<div>
+											<h4 className='text-sm font-medium text-gray-300 mb-2'>🔥 Популярные</h4>
+											<div className='grid grid-cols-4 gap-3'>
+												{availableIcons
+													.filter(icon =>
+														['SiReact', 'SiTypescript', 'SiJavascript', 'SiNodedotjs', 'SiNextdotjs', 'SiPostgresql', 'SiDocker', 'FaAws'].includes(icon.key)
 													)
+													.map((iconData) => (
+														<button
+															key={iconData.key}
+															type='button'
+															onClick={() => handleFieldChange('icon', iconData.key)}
+															className={`p-3 border rounded-md transition-all duration-300
+                                               hover:scale-105 active:scale-95 flex flex-col items-center justify-center gap-1
+                                               ${
+																formData.icon === iconData.key ?
+																	'border-neon bg-neon/20 text-neon shadow-neon'
+																:	'border-line bg-subtle text-gray-300 hover:border-neon/50 hover:text-neon/80'
+															}`}
+															title={`Выбрать ${iconData.name}`}
+														>
+															<div className='flex items-center justify-center h-6'>
+																{renderIcon(iconData.key, {
+																	size: 24,
+																	className: formData.icon === iconData.key ? 'text-neon glyph-glow' : 'text-gray-300'
+																})}
+															</div>
+															<span className='text-xs text-center font-medium break-words'>
+																{iconData.name}
+															</span>
+														</button>
+													))
 												}
-												className={`p-2 border rounded-md transition-all duration-300 
-                                   hover:scale-110 active:scale-95 flex items-center justify-center
-                                   ${
-										formData.icon === iconData.key ?
-											'border-neon bg-neon/20 text-neon shadow-neon'
-										:	'border-line bg-subtle text-gray-300 hover:border-neon/50 hover:text-neon/80'
-									}`}
-												title={`Выбрать ${iconData.title}`}
-											>
-												<NeonIcon 
-													Icon={iconData.IconComponent} 
-													size={20}
-													variant={formData.icon === iconData.key ? "intense" : "subtle"}
-												/>
-											</button>
-										))}
+											</div>
+										</div>
+
+										{/* Протоколы связи и API */}
+										<div>
+											<h4 className='text-sm font-medium text-gray-300 mb-2'>🔌 Протоколы связи</h4>
+											<div className='grid grid-cols-3 gap-3'>
+												{availableIcons
+													.filter(icon =>
+														['SiGraphql', 'TbBrandGraphql', 'TbApi', 'MdWebSocket', 'TbPlugConnected', 'TbWebhook'].includes(icon.key)
+													)
+													.map((iconData) => (
+														<button
+															key={iconData.key}
+															type='button'
+															onClick={() => handleFieldChange('icon', iconData.key)}
+															className={`p-3 border rounded-md transition-all duration-300
+                                               hover:scale-105 active:scale-95 flex flex-col items-center justify-center gap-1
+                                               ${
+																formData.icon === iconData.key ?
+																	'border-neon bg-neon/20 text-neon shadow-neon'
+																:	'border-line bg-subtle text-gray-300 hover:border-neon/50 hover:text-neon/80'
+															}`}
+															title={`Выбрать ${iconData.name}`}
+														>
+															<div className='flex items-center justify-center h-6'>
+																{renderIcon(iconData.key, {
+																	size: 24,
+																	className: formData.icon === iconData.key ? 'text-neon glyph-glow' : 'text-gray-300'
+																})}
+															</div>
+															<span className='text-xs text-center font-medium break-words'>
+																{iconData.name}
+															</span>
+														</button>
+													))
+												}
+											</div>
+										</div>
+
+										{/* Все остальные иконки */}
+										<div>
+											<h4 className='text-sm font-medium text-gray-300 mb-2'>📚 Все иконки</h4>
+											<div className='grid grid-cols-4 gap-2'>
+												{availableIcons.map((iconData) => (
+													<button
+														key={iconData.key}
+														type='button'
+														onClick={() => handleFieldChange('icon', iconData.key)}
+														className={`p-2 border rounded-md transition-all duration-300
+                                           hover:scale-105 active:scale-95 flex flex-col items-center justify-center gap-1
+                                           ${
+															formData.icon === iconData.key ?
+																'border-neon bg-neon/20 text-neon shadow-neon'
+															:	'border-line bg-subtle text-gray-300 hover:border-neon/50 hover:text-neon/80'
+														}`}
+														title={`Выбрать ${iconData.name}`}
+													>
+														<div className='flex items-center justify-center h-5'>
+															{renderIcon(iconData.key, {
+																size: 20,
+																className: formData.icon === iconData.key ? 'text-neon glyph-glow' : 'text-gray-300'
+															})}
+														</div>
+														<span className='text-xs text-center font-medium break-words leading-tight'>
+															{iconData.name}
+														</span>
+													</button>
+												))}
+											</div>
+										</div>
 									</div>
 								</div>
 							:	/* Загрузка файла иконки */

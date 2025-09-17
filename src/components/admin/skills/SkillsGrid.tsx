@@ -9,6 +9,7 @@ interface SkillsGridProps {
 	loading: boolean;
 	onSkillClick: (skill: SkillData) => void;
 	onCreateSkill: () => void;
+	onDeleteSkill?: (skill: SkillData) => void;
 }
 
 /**
@@ -20,6 +21,7 @@ export function SkillsGrid({
 	loading,
 	onSkillClick,
 	onCreateSkill,
+	onDeleteSkill,
 }: SkillsGridProps) {
 	// Loading состояние с скелетонами
 	if (loading) {
@@ -52,50 +54,56 @@ export function SkillsGrid({
 	}
 
 	// Группировка навыков по категориям
-	const навыкиПоКатегориям = skills.reduce(
-		(группы, навык) => {
-			if (!группы[навык.category]) {
-				группы[навык.category] = [];
+	const skillsByCategories = skills.reduce(
+		(groups, skill) => {
+			if (!groups[skill.category]) {
+				groups[skill.category] = [];
 			}
-			группы[навык.category]?.push(навык);
-			return группы;
+			groups[skill.category]?.push(skill);
+			return groups;
 		},
 		{} as Record<string, SkillData[]>,
 	);
 
 	// Сортировка навыков в каждой категории по уровню (убывание)
-	Object.keys(навыкиПоКатегориям).forEach((category) => {
-		навыкиПоКатегориям[category]?.sort((a, b) => b.level - a.level);
+	Object.keys(skillsByCategories).forEach((category) => {
+		skillsByCategories[category]?.sort((a, b) => b.level - a.level);
 	});
 
-	// Порядок отображения категорий
-	const порядокКатегорий = [
-		'Frontend',
-		'Backend',
-		'DevOps',
-		'Tools',
-		'Other',
-	];
-	const отсортированныеКатегории = порядокКатегорий.filter(
-		(cat) => навыкиПоКатегориям[cat] && навыкиПоКатегориям[cat].length > 0,
-	);
+	// Получаем все уникальные категории из навыков и сортируем их
+	const sortedCategories = Object.keys(skillsByCategories).sort((a, b) => {
+		// Сортируем по приоритету: Frontend, Backend, затем остальные по алфавиту
+		const priority: Record<string, number> = {
+			'Frontend': 1,
+			'Backend': 2,
+		};
+		return (priority[a] || 999) - (priority[b] || 999) || a.localeCompare(b);
+	});
 
-	// Иконки для категорий
-	const иконкиКатегорий = {
-		Frontend: '🎨',
-		Backend: '⚙️',
-		DevOps: '🚀',
-		Tools: '🛠️',
-		Other: '💡',
+	// Функция для получения иконки категории
+	const getCategoryIcon = (category: string): string => {
+		const icons: Record<string, string> = {
+			'Frontend': '🎨',
+			'Backend': '⚙️',
+			'DevOps & Tools': '🚀',
+			'DevOps': '🚀',
+			'Инструменты': '🛠️',
+			'Tools': '🛠️',
+		};
+		return icons[category] || '💡';
 	};
 
-	// Цвета для категорий
-	const цветаКатегорий = {
-		Frontend: 'neon',
-		Backend: 'cyan',
-		DevOps: 'purple-400',
-		Tools: 'yellow-400',
-		Other: 'orange-400',
+	// Функция для получения цвета категории
+	const getCategoryColor = (category: string): string => {
+		const colors: Record<string, string> = {
+			'Frontend': 'neon',
+			'Backend': 'cyan',
+			'DevOps & Tools': 'purple-400',
+			'DevOps': 'purple-400',
+			'Инструменты': 'yellow-400',
+			'Tools': 'yellow-400',
+		};
+		return colors[category] || 'orange-400';
 	};
 
 	// Состояние пустых данных
@@ -124,16 +132,12 @@ export function SkillsGrid({
 	return (
 		<div className='bg-panel border border-line rounded-lg bevel p-6'>
 			<div className='space-y-8'>
-				{отсортированныеКатегории.map((category) => {
-					const навыкиВКатегории = навыкиПоКатегориям[category];
-					const цветКатегории =
-						цветаКатегорий[category as keyof typeof цветаКатегорий];
-					const иконка =
-						иконкиКатегорий[
-							category as keyof typeof иконкиКатегорий
-						];
+				{sortedCategories.map((category) => {
+					const skillsInCategory = skillsByCategories[category];
+					const categoryColor = getCategoryColor(category);
+					const icon = getCategoryIcon(category);
 
-					if (!навыкиВКатегории || навыкиВКатегории.length === 0)
+					if (!skillsInCategory || skillsInCategory.length === 0)
 						return null;
 
 					return (
@@ -144,17 +148,17 @@ export function SkillsGrid({
 							{/* Заголовок категории */}
 							<div className='flex items-center justify-between'>
 								<div className='flex items-center space-x-3'>
-									<div className='text-2xl'>{иконка}</div>
+									<div className='text-2xl'>{icon}</div>
 									<h3
-										className={`text-lg font-bold text-${цветКатегории} glyph-glow`}
+										className={`text-lg font-bold text-${categoryColor} glyph-glow`}
 									>
 										{category}
 									</h3>
 									<div className='text-sm text-soft'>
-										({навыкиВКатегории.length} навык
-										{навыкиВКатегории.length === 1 ?
+										({skillsInCategory.length} навык
+										{skillsInCategory.length === 1 ?
 											''
-										: навыкиВКатегории.length < 5 ?
+										: skillsInCategory.length < 5 ?
 											'а'
 										:	'ов'}
 										)
@@ -167,13 +171,13 @@ export function SkillsGrid({
 										Средний уровень:
 									</span>
 									<span
-										className={`text-sm font-bold text-${цветКатегории}`}
+										className={`text-sm font-bold text-${categoryColor}`}
 									>
 										{Math.round(
-											навыкиВКатегории.reduce(
+											skillsInCategory.reduce(
 												(sum, s) => sum + s.level,
 												0,
-											) / навыкиВКатегории.length,
+											) / skillsInCategory.length,
 										)}
 										%
 									</span>
@@ -182,12 +186,13 @@ export function SkillsGrid({
 
 							{/* CSS Grid сетка навыков */}
 							<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-								{навыкиВКатегории.map((skill) => (
+								{skillsInCategory.map((skill) => (
 									<SkillCard
 										key={skill.id}
 										skill={skill}
 										onClick={onSkillClick}
-										categoryColor={цветКатегории}
+										onDelete={onDeleteSkill}
+										categoryColor={categoryColor}
 									/>
 								))}
 							</div>

@@ -15,18 +15,18 @@ const config: Config = {
         subtle: "#0F1214",
         panel: "#0F1214",
         hover: "#1A1F22",
-        
+
         // Текстовые цвета
         base: "#E6F4EF",
         soft: "#B8C5C0",
-        
+
         // Неоновые акценты
         neon: "#00FF99",
         cyan: "#00FFCC",
-        
+
         // Границы и линии
         line: "#1C2A25",
-        
+
         // Дополнительные алиасы для совместимости
         "bg-subtle": "#0F1214",
         "bg-hover": "#1A1F22",
@@ -34,6 +34,14 @@ const config: Config = {
         "text-subtle": "#B8C5C0",
         "neon-green": "#00FF99",
         "neon-cyan": "#00FFCC",
+
+        // Цвета для категорий навыков
+        "purple-400": "#c084fc",
+        "yellow-400": "#facc15",
+        "orange-400": "#fb923c",
+        "green-400": "#4ade80",
+        "red-400": "#f87171",
+        "red-500": "#ef4444",
       },
       
       // Шрифты

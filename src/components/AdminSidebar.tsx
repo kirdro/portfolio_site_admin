@@ -9,6 +9,7 @@ import {
 	FaUsers,
 	FaRocket,
 	FaBolt,
+	FaUser,
 	FaComments,
 	FaRobot,
 	FaPen,
@@ -54,6 +55,12 @@ const menuItems: MenuItem[] = [
 		label: 'Навыки',
 		icon: FaBolt,
 		description: 'Управление навыками',
+	},
+	{
+		href: '/profile',
+		label: 'Профиль',
+		icon: FaUser,
+		description: 'Редактирование профиля',
 	},
 	{
 		href: '/chat',

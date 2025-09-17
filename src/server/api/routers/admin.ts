@@ -580,21 +580,15 @@ export const adminRouter = createTRPCRouter({
 			.input(
 				z
 					.object({
-						category: z
-							.enum([
-								'Frontend',
-								'Backend',
-								'DevOps',
-								'Tools',
-								'Other',
-							])
-							.optional(),
+						category: z.string().optional(), // Любая строка для категории
 						minLevel: z.number().min(1).max(100).optional(),
+						limit: z.number().min(1).max(100).optional(),
+						offset: z.number().min(0).optional(),
 					})
 					.optional(),
 			)
 			.query(async ({ input = {} }) => {
-				const { category, minLevel } = input;
+				const { category, minLevel, limit, offset } = input;
 
 				// Строим условия фильтрации
 				const where: any = {};
@@ -608,6 +602,7 @@ export const adminRouter = createTRPCRouter({
 				}
 
 				// Получаем навыки с сортировкой по категориям и уровню
+				// Если не указан limit, получаем все записи
 				const skills = await prisma.skill.findMany({
 					where,
 					orderBy: [
@@ -615,6 +610,8 @@ export const adminRouter = createTRPCRouter({
 						{ level: 'desc' },
 						{ name: 'asc' },
 					],
+					...(limit && { take: limit }),
+					...(offset && { skip: offset }),
 				});
 
 				return skills;
@@ -640,15 +637,9 @@ export const adminRouter = createTRPCRouter({
 			.input(
 				z.object({
 					name: z.string().min(1).max(50),
-					category: z.enum([
-						'Frontend',
-						'Backend',
-						'DevOps',
-						'Tools',
-						'Other',
-					]),
+					category: z.string().min(1).max(50), // Любая строка для категории
 					level: z.number().min(1).max(100),
-					icon: z.string().min(1).max(10),
+					icon: z.string().min(1).max(50),
 				}),
 			)
 			.mutation(async ({ input, ctx }) => {
@@ -670,15 +661,9 @@ export const adminRouter = createTRPCRouter({
 				z.object({
 					id: z.string(),
 					name: z.string().min(1).max(50),
-					category: z.enum([
-						'Frontend',
-						'Backend',
-						'DevOps',
-						'Tools',
-						'Other',
-					]),
+					category: z.string().min(1).max(50), // Любая строка для категории
 					level: z.number().min(1).max(100),
-					icon: z.string().min(1).max(10),
+					icon: z.string().min(1).max(50),
 				}),
 			)
 			.mutation(async ({ input, ctx }) => {
@@ -770,6 +755,21 @@ export const adminRouter = createTRPCRouter({
 				expertSkills,
 				regularSkills: totalSkills - expertSkills,
 			};
+		}),
+
+		// Получение всех уникальных категорий
+		getCategories: protectedProcedure.query(async () => {
+			const categories = await prisma.skill.findMany({
+				select: {
+					category: true
+				},
+				distinct: ['category'],
+				orderBy: {
+					category: 'asc'
+				}
+			});
+
+			return categories.map(c => c.category);
 		}),
 	}),
 

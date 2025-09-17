@@ -129,6 +129,56 @@
 		@apply transition-all duration-300;
 	}
 
+	/* Киберпанк textarea */
+	.cyber-textarea {
+		@apply bg-bg-subtle border border-line text-text-base;
+		@apply focus:border-neon-green focus:shadow-neon-soft focus:outline-none;
+		@apply transition-all duration-300 resize-none;
+		background-image: 
+			linear-gradient(rgba(0, 255, 153, 0.05) 1px, transparent 1px);
+		background-size: 100% 1.2em;
+	}
+
+	/* Киберпанк select */
+	.cyber-select {
+		@apply bg-bg-subtle border border-line text-text-base;
+		@apply focus:border-neon-green focus:shadow-neon-soft focus:outline-none;
+		@apply transition-all duration-300 bevel-sm;
+	}
+
+	.cyber-select-content {
+		@apply bg-bg-subtle border border-line bevel-sm;
+		@apply shadow-lg shadow-black/50;
+	}
+
+	/* Киберпанк кнопки */
+	.cyber-button-primary {
+		@apply bg-gradient-to-r from-neon-green to-neon-cyan;
+		@apply text-black font-semibold bevel-sm;
+		@apply hover:from-neon-cyan hover:to-neon-green;
+		@apply focus:shadow-neon-soft focus:outline-none;
+		@apply transition-all duration-300 transform;
+		@apply hover:-translate-y-0.5 active:translate-y-0;
+	}
+
+	/* Киберпанк текст */
+	.cyber-text {
+		@apply font-bold text-transparent bg-clip-text;
+		@apply bg-gradient-to-r from-neon-green to-neon-cyan;
+		font-family: 'Jura', sans-serif;
+	}
+
+	/* Loader */
+	.cyber-loader {
+		width: 50px;
+		height: 50px;
+		border: 3px solid transparent;
+		border-top: 3px solid #00FF99;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+		box-shadow: 0 0 20px #00FF99;
+	}
+
 	/* Навигационные элементы */
 	.nav-link {
 		@apply text-text-subtle hover:text-neon-green;
@@ -180,5 +230,24 @@
 		background: #00ff99;
 		border-radius: 0px;
 		box-shadow: 0 0 5px #00ff99;
+	}
+}
+
+/* Анимации */
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes scanLine {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100vw);
 	}
 }

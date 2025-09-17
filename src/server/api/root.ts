@@ -6,6 +6,7 @@ import { aiChatRouter } from './routers/aiChat';
 import { blogRouter } from './routers/blog-simple';
 import { settingsRouter } from './routers/settings';
 import { filesRouter } from './routers/files';
+import { profileRouter } from './routers/profile';
 
 /**
  * Главный tRPC роутер для админ-панели
@@ -19,6 +20,7 @@ export const appRouter = createTRPCRouter({
 	blog: blogRouter,
 	settings: settingsRouter,
 	files: filesRouter,
+	profile: profileRouter,
 });
 
 // Экспортируем типы роутера для использования на клиенте
