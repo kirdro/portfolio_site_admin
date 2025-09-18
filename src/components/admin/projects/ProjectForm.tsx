@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { z } from 'zod';
 import type { ProjectData } from '../../../app/(dashboard)/projects/page';
 import { FileUploadDeferred } from '../../ui/FileUploadDeferred';
@@ -90,13 +90,13 @@ export function ProjectForm({
 
 	// Состояние формы
 	const [formData, setFormData] = useState({
-		title: project?.title || '',
-		description: project?.description || '',
-		imageUrl: project?.imageUrl || '',
-		demoUrl: project?.demoUrl || '',
-		githubUrl: project?.githubUrl || '',
-		featured: project?.featured || false,
-		tags: project?.tags || [],
+		title: '',
+		description: '',
+		imageUrl: '',
+		demoUrl: '',
+		githubUrl: '',
+		featured: false,
+		tags: [] as string[],
 	});
 
 	const [errors, setErrors] = useState<Record<string, string>>({});
@@ -105,6 +105,43 @@ export function ProjectForm({
 		null,
 	);
 	const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+
+	// Обновляем форму при изменении проекта или режима создания
+	useEffect(() => {
+		if (isOpen) {
+			if (isCreating) {
+				// Сброс формы для создания нового проекта
+				setFormData({
+					title: '',
+					description: '',
+					imageUrl: '',
+					demoUrl: '',
+					githubUrl: '',
+					featured: false,
+					tags: [],
+				});
+				setSelectedImageFile(null);
+				setPreviewImageUrl(null);
+				setErrors({});
+				setCurrentTag('');
+			} else if (project) {
+				// Загрузка данных существующего проекта
+				setFormData({
+					title: project.title || '',
+					description: project.description || '',
+					imageUrl: project.imageUrl || '',
+					demoUrl: project.demoUrl || '',
+					githubUrl: project.githubUrl || '',
+					featured: project.featured || false,
+					tags: project.tags || [],
+				});
+				setSelectedImageFile(null);
+				setPreviewImageUrl(null);
+				setErrors({});
+				setCurrentTag('');
+			}
+		}
+	}, [project, isCreating, isOpen]);
 
 	// Расширенный список доступных технологий для автодополнения
 	const availableTags = [
