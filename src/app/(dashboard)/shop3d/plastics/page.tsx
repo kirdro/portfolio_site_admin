@@ -14,7 +14,7 @@ interface Plastic {
 	color: string;
 	colorHex: string | null;
 	pricePerGram: number | null;
-	characteristics: string | null;
+	characteristics: any;
 	isActive: boolean;
 }
 
@@ -94,7 +94,7 @@ export default function PlasticsPage() {
 			color: item.color,
 			colorHex: item.colorHex || '',
 			pricePerKg: item.pricePerGram ? (item.pricePerGram * 1000).toString() : '',
-			characteristics: item.characteristics || '',
+			characteristics: typeof item.characteristics === 'string' ? item.characteristics : JSON.stringify(item.characteristics) || '',
 			isActive: item.isActive,
 		});
 		setIsFormOpen(true);
@@ -115,7 +115,7 @@ export default function PlasticsPage() {
 		(item: Plastic) => {
 			updateMutation.mutate({
 				id: item.id,
-				data: { isActive: !item.isActive },
+				isActive: !item.isActive,
 			});
 		},
 		[updateMutation],
@@ -142,14 +142,14 @@ export default function PlasticsPage() {
 				name: formData.name.trim(),
 				material: formData.material.trim(),
 				color: formData.color.trim(),
-				colorHex: formData.colorHex.trim() || null,
-				pricePerGram,
-				characteristics: formData.characteristics.trim() || null,
+				colorHex: formData.colorHex.trim() || undefined,
+				pricePerGram: pricePerGram || undefined,
+				characteristics: formData.characteristics.trim() || undefined,
 				isActive: formData.isActive,
 			};
 
 			if (editingItem) {
-				updateMutation.mutate({ id: editingItem.id, data });
+				updateMutation.mutate({ id: editingItem.id, ...data });
 			} else {
 				createMutation.mutate(data);
 			}

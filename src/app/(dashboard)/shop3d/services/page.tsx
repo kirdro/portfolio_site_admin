@@ -109,7 +109,7 @@ export default function ServicesPage() {
 		(item: Service) => {
 			updateMutation.mutate({
 				id: item.id,
-				data: { isActive: !item.isActive },
+				isActive: !item.isActive,
 			});
 		},
 		[updateMutation],
@@ -157,14 +157,14 @@ export default function ServicesPage() {
 
 			const data = {
 				name: formData.name.trim(),
-				description: formData.description.trim() || null,
+				description: formData.description.trim() || undefined,
 				priceFrom,
-				imageUrl: imageUrl?.trim() || null,
+				imageUrl: imageUrl?.trim() || undefined,
 				isActive: formData.isActive,
 			};
 
 			if (editingItem) {
-				updateMutation.mutate({ id: editingItem.id, data });
+				updateMutation.mutate({ id: editingItem.id, ...data });
 			} else {
 				createMutation.mutate(data);
 			}

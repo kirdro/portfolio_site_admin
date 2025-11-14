@@ -286,7 +286,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 											className='accent-neon'
 										/>
 										<span className='text-sm text-base'>
-											{plastic.name} ({plastic.pricePerGram * 1000}₽/кг)
+											{plastic.name} {plastic.pricePerGram ? `(${(plastic.pricePerGram * 1000).toFixed(0)}₽/кг)` : ''}
 										</span>
 									</label>
 								))}
@@ -338,7 +338,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 										/>
 										<div
 											className='w-4 h-4 rounded'
-											style={{ backgroundColor: tag.color }}
+											style={{ backgroundColor: tag.color || '#00FF99' }}
 										/>
 										<span className='text-sm text-base'>{tag.name}</span>
 									</label>
@@ -385,14 +385,14 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 					</button>
 					<button
 						type='submit'
-						disabled={createProduct.isLoading || updateProduct.isLoading}
+						disabled={createProduct.isPending || updateProduct.isPending}
 						className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded font-medium
                      disabled:opacity-50 disabled:cursor-not-allowed transition-colors
                      flex items-center gap-2'
 					>
 						<FaSave />
-						{createProduct.isLoading || updateProduct.isLoading ?
+						{createProduct.isPending || updateProduct.isPending ?
 							'Сохранение...'
 						:	'Сохранить'}
 					</button>
