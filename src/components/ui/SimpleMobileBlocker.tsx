@@ -11,7 +11,6 @@ export const SimpleMobileBlocker: React.FC = () => {
 			const currentWidth = window.innerWidth;
 			setWidth(currentWidth);
 			setShouldShow(currentWidth < 1000);
-			console.log('SimpleMobileBlocker: width =', currentWidth, 'shouldShow =', currentWidth < 1000);
 		};
 
 		handleResize();

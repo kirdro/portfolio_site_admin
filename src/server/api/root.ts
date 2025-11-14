@@ -7,6 +7,7 @@ import { blogRouter } from './routers/blog-simple';
 import { settingsRouter } from './routers/settings';
 import { filesRouter } from './routers/files';
 import { profileRouter } from './routers/profile';
+import { shop3dRouter } from './routers/shop3d';
 
 /**
  * Главный tRPC роутер для админ-панели
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
 	settings: settingsRouter,
 	files: filesRouter,
 	profile: profileRouter,
+	shop3d: shop3dRouter,
 });
 
 // Экспортируем типы роутера для использования на клиенте

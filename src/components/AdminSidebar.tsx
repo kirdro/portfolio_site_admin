@@ -15,6 +15,7 @@ import {
 	FaPen,
 	FaEnvelope,
 	FaCog,
+	FaCube,
 	FaChevronLeft,
 	FaChevronRight,
 } from 'react-icons/fa';
@@ -55,6 +56,12 @@ const menuItems: MenuItem[] = [
 		label: 'Навыки',
 		icon: FaBolt,
 		description: 'Управление навыками',
+	},
+	{
+		href: '/shop3d',
+		label: '3D Магазин',
+		icon: FaCube,
+		description: 'Интернет-магазин 3D деталей',
 	},
 	{
 		href: '/profile',
@@ -131,7 +138,7 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 				<nav className='flex-1 p-2'>
 					<ul className='space-y-2'>
 						{menuItems.map((item) => {
-							const isActive = pathname === item.href;
+							const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
 							return (
 								<li key={item.href}>
