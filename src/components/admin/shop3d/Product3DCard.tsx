@@ -11,6 +11,7 @@ interface Product3DCardProps {
 		category?: { id: string; name: string } | string | null;
 		quantity?: number | null;
 		isActive: boolean;
+		images?: string[];
 		files?: Array<{
 			id: string;
 			s3Url: string;
@@ -24,8 +25,8 @@ export const Product3DCard = React.memo(function Product3DCard({
 	product,
 	onClick,
 }: Product3DCardProps) {
-	// Get first image if available
-	const imageUrl = product.files?.[0]?.s3Url;
+	// Get first image if available - prioritize images array, fallback to files
+	const imageUrl = product.images?.[0] || product.files?.[0]?.s3Url;
 
 	return (
 		<div

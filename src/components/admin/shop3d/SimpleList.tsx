@@ -69,9 +69,15 @@ export function SimpleList<T extends { id: string }>({
 										{title}
 									</h3>
 									{badge && (
-										<span className='px-2 py-1 text-xs font-mono bg-neon/20 text-neon border border-neon/50 rounded'>
-											{badge}
-										</span>
+										badge.startsWith('#') ?
+											<div
+												className='w-6 h-6 rounded border border-line'
+												style={{ backgroundColor: badge }}
+												title={badge}
+											/>
+										:	<span className='px-2 py-1 text-xs font-mono bg-neon/20 text-neon border border-neon/50 rounded'>
+												{badge}
+											</span>
 									)}
 									{!isActive && (
 										<span className='px-2 py-1 text-xs font-mono bg-red-500/20 text-red-400 border border-red-500/50 rounded'>

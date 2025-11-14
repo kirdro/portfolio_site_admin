@@ -23,7 +23,7 @@ interface FormData {
 	material: string;
 	color: string;
 	colorHex: string;
-	pricePerGram: string;
+	pricePerKg: string;
 	characteristics: string;
 	isActive: boolean;
 }
@@ -40,7 +40,7 @@ export default function PlasticsPage() {
 		material: '',
 		color: '',
 		colorHex: '',
-		pricePerGram: '',
+		pricePerKg: '',
 		characteristics: '',
 		isActive: true,
 	});
@@ -72,7 +72,7 @@ export default function PlasticsPage() {
 			material: '',
 			color: '',
 			colorHex: '',
-			pricePerGram: '',
+			pricePerKg: '',
 			characteristics: '',
 			isActive: true,
 		});
@@ -93,7 +93,7 @@ export default function PlasticsPage() {
 			material: item.material,
 			color: item.color,
 			colorHex: item.colorHex || '',
-			pricePerGram: item.pricePerGram?.toString() || '',
+			pricePerKg: item.pricePerGram ? (item.pricePerGram * 1000).toString() : '',
 			characteristics: item.characteristics || '',
 			isActive: item.isActive,
 		});
@@ -128,12 +128,14 @@ export default function PlasticsPage() {
 
 			// Валидация цены
 			let pricePerGram: number | null = null;
-			if (formData.pricePerGram.trim()) {
-				pricePerGram = parseFloat(formData.pricePerGram);
-				if (isNaN(pricePerGram) || pricePerGram < 0) {
-					alert('Укажите корректную цену за грамм');
+			if (formData.pricePerKg.trim()) {
+				const pricePerKg = parseFloat(formData.pricePerKg);
+				if (isNaN(pricePerKg) || pricePerKg < 0) {
+					alert('Укажите корректную цену за килограмм');
 					return;
 				}
+				// Переводим цену из кг в граммы
+				pricePerGram = pricePerKg / 1000;
 			}
 
 			const data = {
@@ -181,7 +183,7 @@ export default function PlasticsPage() {
 					onClick={handleCreate}
 					className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
-                     bevel transition-all duration-300 flex items-center gap-2'
+                     bevel transition-all duration-300 flex items-center gap-2 cursor-pointer'
 				>
 					<NeonIcon Icon={FaPlus} size={16} variant='default' />
 					Добавить пластик
@@ -197,7 +199,7 @@ export default function PlasticsPage() {
 				onToggleActive={handleToggleActive}
 				renderItem={(item: Plastic) => ({
 					title: `${item.name} (${item.material})`,
-					subtitle: `Цвет: ${item.color}${item.pricePerGram ? ` • ${item.pricePerGram} ₽/г` : ''}`,
+					subtitle: `Цвет: ${item.color}${item.pricePerGram ? ` • ${(item.pricePerGram * 1000).toFixed(0)} ₽/кг` : ''}`,
 					badge: item.colorHex || undefined,
 					isActive: item.isActive,
 				})}
@@ -291,27 +293,30 @@ export default function PlasticsPage() {
 						</div>
 					</div>
 
-					{/* Цена за грамм */}
+					{/* Цена за килограмм */}
 					<div>
 						<label className='block text-sm font-medium text-soft mb-2'>
-							Цена за грамм (₽)
+							Цена за килограмм (₽)
 						</label>
 						<div className='relative'>
 							<input
 								type='number'
-								value={formData.pricePerGram}
-								onChange={(e) => handleFieldChange('pricePerGram', e.target.value)}
+								value={formData.pricePerKg}
+								onChange={(e) => handleFieldChange('pricePerKg', e.target.value)}
 								className='w-full px-3 py-2 pr-10 bg-subtle border border-line rounded-md
                          text-base focus:border-neon focus:outline-none
                          transition-colors'
-								placeholder='0.50'
+								placeholder='500'
 								min='0'
-								step='0.01'
+								step='1'
 							/>
 							<div className='absolute right-3 top-1/2 -translate-y-1/2 text-soft'>
 								<NeonIcon Icon={FaRubleSign} size={14} variant='subtle' />
 							</div>
 						</div>
+						<p className='text-xs text-soft mt-1'>
+							Укажите цену за 1 килограмм пластика
+						</p>
 					</div>
 
 					{/* Характеристики */}

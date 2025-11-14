@@ -147,7 +147,7 @@ export default function CategoriesPage() {
 					onClick={handleCreate}
 					className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
-                     bevel transition-all duration-300 flex items-center gap-2'
+                     bevel transition-all duration-300 flex items-center gap-2 cursor-pointer'
 				>
 					<NeonIcon Icon={FaPlus} size={16} variant='default' />
 					Добавить категорию

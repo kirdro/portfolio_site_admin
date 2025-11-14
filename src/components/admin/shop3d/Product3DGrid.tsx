@@ -11,6 +11,7 @@ interface Product {
 	category?: { id: string; name: string } | string | null;
 	quantity?: number | null;
 	isActive: boolean;
+	images?: string[];
 	files?: Array<{
 		id: string;
 		s3Url: string;

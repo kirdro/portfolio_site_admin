@@ -4,8 +4,9 @@ import React, { useState, useCallback } from 'react';
 import { api } from '../../../../utils/api';
 import { SimpleList } from '../../../../components/admin/shop3d/SimpleList';
 import { SimpleFormModal } from '../../../../components/admin/shop3d/SimpleFormModal';
+import { FileUploadDeferred } from '../../../../components/ui/FileUploadDeferred';
 import { NeonIcon } from '../../../../components/ui/NeonIcon';
-import { FaPlus, FaWrench, FaRubleSign } from 'react-icons/fa';
+import { FaPlus, FaWrench, FaRubleSign, FaImage } from 'react-icons/fa';
 
 interface Service {
 	id: string;
@@ -31,6 +32,7 @@ interface FormData {
 export default function ServicesPage() {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingItem, setEditingItem] = useState<Service | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const [formData, setFormData] = useState<FormData>({
 		name: '',
 		description: '',
@@ -41,6 +43,7 @@ export default function ServicesPage() {
 
 	// API запросы
 	const { data: services, isLoading, refetch } = api.shop3d.services.getAll.useQuery();
+	const uploadFile = api.files.upload.useMutation();
 	const createMutation = api.shop3d.services.create.useMutation({
 		onSuccess: () => {
 			refetch();
@@ -69,6 +72,7 @@ export default function ServicesPage() {
 			isActive: true,
 		});
 		setEditingItem(null);
+		setSelectedFile(null);
 	}, []);
 
 	// Открытие формы создания
@@ -113,7 +117,7 @@ export default function ServicesPage() {
 
 	// Отправка формы
 	const handleSubmit = useCallback(
-		(e: React.FormEvent) => {
+		async (e: React.FormEvent) => {
 			e.preventDefault();
 
 			const priceFrom = parseFloat(formData.priceFrom);
@@ -122,11 +126,40 @@ export default function ServicesPage() {
 				return;
 			}
 
+			let imageUrl = formData.imageUrl;
+
+			// Загружаем файл, если он выбран
+			if (selectedFile) {
+				try {
+					const fileBase64 = await new Promise<string>((resolve) => {
+						const reader = new FileReader();
+						reader.onloadend = () => {
+							const base64 = reader.result as string;
+							resolve(base64.split(',')[1] || '');
+						};
+						reader.readAsDataURL(selectedFile);
+					});
+
+					const uploadResult = await uploadFile.mutateAsync({
+						file: fileBase64,
+						fileName: selectedFile.name,
+						mimeType: selectedFile.type,
+						category: 'project',
+					});
+
+					imageUrl = uploadResult.url;
+				} catch (error) {
+					console.error('Ошибка загрузки файла:', error);
+					alert('Ошибка при загрузке изображения');
+					return;
+				}
+			}
+
 			const data = {
 				name: formData.name.trim(),
 				description: formData.description.trim() || null,
 				priceFrom,
-				imageUrl: formData.imageUrl.trim() || null,
+				imageUrl: imageUrl?.trim() || null,
 				isActive: formData.isActive,
 			};
 
@@ -136,7 +169,7 @@ export default function ServicesPage() {
 				createMutation.mutate(data);
 			}
 		},
-		[formData, editingItem, createMutation, updateMutation],
+		[formData, editingItem, createMutation, updateMutation, selectedFile, uploadFile],
 	);
 
 	// Изменение поля формы
@@ -165,7 +198,7 @@ export default function ServicesPage() {
 					onClick={handleCreate}
 					className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
-                     bevel transition-all duration-300 flex items-center gap-2'
+                     bevel transition-all duration-300 flex items-center gap-2 cursor-pointer'
 				>
 					<NeonIcon Icon={FaPlus} size={16} variant='default' />
 					Добавить услугу
@@ -256,19 +289,23 @@ export default function ServicesPage() {
 						</div>
 					</div>
 
-					{/* URL изображения */}
+					{/* Изображение */}
 					<div>
 						<label className='block text-sm font-medium text-soft mb-2'>
-							URL изображения
+							<FaImage className='inline mr-2' />
+							Изображение услуги
 						</label>
-						<input
-							type='text'
-							value={formData.imageUrl}
-							onChange={(e) => handleFieldChange('imageUrl', e.target.value)}
-							className='w-full px-3 py-2 bg-subtle border border-line rounded-md
-                       text-base focus:border-neon focus:outline-none
-                       transition-colors'
-							placeholder='https://example.com/image.jpg'
+						<FileUploadDeferred
+							onFileSelected={(file, previewUrl) => {
+								setSelectedFile(file);
+								if (!file && editingItem?.imageUrl) {
+									handleFieldChange('imageUrl', editingItem.imageUrl);
+								}
+							}}
+							currentFileUrl={editingItem?.imageUrl || formData.imageUrl || undefined}
+							category='project'
+							acceptedTypes='image/*'
+							preview={true}
 						/>
 					</div>
 

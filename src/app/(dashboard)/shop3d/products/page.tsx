@@ -3,6 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import { api } from '../../../../utils/api';
 import { Product3DGrid } from '../../../../components/admin/shop3d/Product3DGrid';
+import { ProductModal } from '../../../../components/admin/shop3d/ProductModal';
 import { NeonIcon } from '../../../../components/ui/NeonIcon';
 import { Spinner, SkeletonLoader } from '../../../../components/ui/loaders';
 import {
@@ -20,13 +21,29 @@ export interface Product3DData {
 	name: string;
 	description?: string | null;
 	price: number;
-	category?: string | null;
+	category?: {
+		id: string;
+		name: string;
+	} | null;
+	categoryId?: string | null;
 	quantity?: number | null;
 	isActive: boolean;
+	isFeatured?: boolean;
+	images?: string[];  // Массив URL изображений
 	files?: Array<{
 		id: string;
 		s3Url: string;
 		originalName: string;
+	}>;
+	plastics?: Array<{
+		plastic: {
+			id: string;
+			name: string;
+		}
+	}>;
+	tags?: Array<{
+		id: string;
+		name: string;
 	}>;
 }
 
@@ -39,6 +56,9 @@ export default function ProductsPage() {
 	const [selectedProduct, setSelectedProduct] = useState<Product3DData | null>(
 		null,
 	);
+
+	// Состояние модального окна
+	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	// Состояние фильтрации
 	const [categoryFilter, setCategoryFilter] = useState<string | undefined>(
@@ -70,13 +90,25 @@ export default function ProductsPage() {
 	// Обработчик клика по продукту
 	const handleProductClick = useCallback((product: Product3DData) => {
 		setSelectedProduct(product);
-		// TODO: Открыть модальное окно редактирования
+		setIsModalOpen(true);
 	}, []);
 
 	// Обработчик создания нового продукта
 	const handleCreateProduct = useCallback(() => {
-		// TODO: Открыть форму создания продукта
+		setSelectedProduct(null);
+		setIsModalOpen(true);
 	}, []);
+
+	// Обработчик закрытия модалки
+	const handleCloseModal = useCallback(() => {
+		setIsModalOpen(false);
+		setSelectedProduct(null);
+	}, []);
+
+	// Обработчик сохранения продукта
+	const handleSaveProduct = useCallback(() => {
+		refetchProducts();
+	}, [refetchProducts]);
 
 	return (
 		<div className='space-y-6'>
@@ -242,7 +274,7 @@ export default function ProductsPage() {
 					onClick={handleCreateProduct}
 					className='px-4 py-2 bg-neon/20 border border-neon text-neon
                      hover:bg-neon/30 hover:shadow-neon rounded-md font-medium
-                     bevel transition-all duration-300 flex items-center gap-2'
+                     bevel transition-all duration-300 flex items-center gap-2 cursor-pointer'
 				>
 					<NeonIcon Icon={FaPlus} size={16} variant='default' />
 					Добавить продукт
@@ -265,8 +297,13 @@ export default function ProductsPage() {
 				/>
 			}
 
-			{/* TODO: Добавить модальное окно для создания/редактирования продукта */}
-			{/* TODO: Добавить модальное окно для удаления продукта */}
+			{/* Модальное окно для создания/редактирования продукта */}
+			<ProductModal
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+				product={selectedProduct}
+				onSave={handleSaveProduct}
+			/>
 		</div>
 	);
 }
