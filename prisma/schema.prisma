@@ -438,3 +438,130 @@ enum UserRole {
   USER
   ADMIN
 }
+
+// ============================================
+// 3D SHOP MODELS
+// ============================================
+
+// 1. Услуги 3D магазина
+model Shop3DService {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  priceFrom   Float
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("Shop3DService")
+}
+
+// 2. Категории товаров
+model Shop3DCategory {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  products    Shop3DProduct[]
+
+  @@index([name])
+  @@map("Shop3DCategory")
+}
+
+// 3. Теги (хит, премиум и т.д.)
+model Shop3DTag {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  color       String?          @default("#00FF99")
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  products    Shop3DProduct[]
+
+  @@index([name])
+  @@map("Shop3DTag")
+}
+
+// 4. Пластики/Материалы
+model Shop3DPlastic {
+  id              String                     @id @default(cuid())
+  name            String
+  material        String                     // PLA, ABS, PETG и т.д.
+  color           String
+  colorHex        String?                    // Hex код цвета для отображения
+  characteristics Json?                      // Гибкие характеристики
+  pricePerGram    Float?
+  isActive        Boolean                    @default(true)
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+
+  products        Shop3DProductPlastic[]
+
+  @@index([material, color])
+  @@map("Shop3DPlastic")
+}
+
+// 5. Продукты/Детали 3D печати
+model Shop3DProduct {
+  id              String                     @id @default(cuid())
+  name            String
+  description     String?
+  price           Float
+  images          String[]                   @default([])
+  characteristics Json?                      // Гибкие характеристики (размеры, вес и т.д.)
+  productionTime  Int?                       // Время изготовления в часах
+  categoryId      String?
+  isActive        Boolean                    @default(true)
+  isFeatured      Boolean                    @default(false)
+  createdAt       DateTime                   @default(now())
+  updatedAt       DateTime                   @updatedAt
+
+  category        Shop3DCategory?            @relation(fields: [categoryId], references: [id])
+  tags            Shop3DTag[]
+  plastics        Shop3DProductPlastic[]
+
+  @@index([categoryId])
+  @@index([isActive, isFeatured])
+  @@map("Shop3DProduct")
+}
+
+// Связующая таблица для многие-ко-многим между продуктами и пластиками
+model Shop3DProductPlastic {
+  id         String        @id @default(cuid())
+  productId  String
+  plasticId  String
+  quantity   Float?        // Количество грамм (опционально)
+  createdAt  DateTime      @default(now())
+
+  product    Shop3DProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  plastic    Shop3DPlastic @relation(fields: [plasticId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, plasticId])
+  @@index([productId])
+  @@index([plasticId])
+  @@map("Shop3DProductPlastic")
+}
+
+// 6. Контакты 3D магазина
+model Shop3DContact {
+  id          String   @id @default(cuid())
+  type        String   // phone, email, address, telegram, whatsapp и т.д.
+  label       String   // Отображаемое название
+  value       String   // Значение (номер, адрес, ссылка)
+  icon        String?  // Иконка для отображения
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([type, isActive])
+  @@index([order])
+  @@map("Shop3DContact")
+}
