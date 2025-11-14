@@ -8,7 +8,7 @@ interface Product {
 	name: string;
 	description?: string | null;
 	price: number;
-	category?: string | null;
+	category?: { id: string; name: string } | string | null;
 	quantity?: number | null;
 	isActive: boolean;
 	files?: Array<{

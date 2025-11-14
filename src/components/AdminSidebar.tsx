@@ -138,7 +138,7 @@ export default function AdminSidebar({ isOpen, onToggle }: AdminSidebarProps) {
 				<nav className='flex-1 p-2'>
 					<ul className='space-y-2'>
 						{menuItems.map((item) => {
-							const isActive = pathname === item.href;
+							const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
 
 							return (
 								<li key={item.href}>

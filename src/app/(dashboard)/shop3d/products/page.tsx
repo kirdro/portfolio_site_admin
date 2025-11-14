@@ -56,7 +56,7 @@ export default function ProductsPage() {
 	} = api.shop3d.products.getAll.useQuery({
 		limit: 50,
 		offset: 0,
-		category: categoryFilter,
+		categoryId: categoryFilter,
 		isActive: activeFilter,
 	});
 
@@ -65,19 +65,17 @@ export default function ProductsPage() {
 		api.shop3d.products.getStats.useQuery();
 
 	// Категории
-	const { data: categories } = api.shop3d.products.getCategories.useQuery();
+	const { data: categories } = api.shop3d.categories.getAll.useQuery();
 
 	// Обработчик клика по продукту
 	const handleProductClick = useCallback((product: Product3DData) => {
 		setSelectedProduct(product);
 		// TODO: Открыть модальное окно редактирования
-		console.log('Selected product:', product);
 	}, []);
 
 	// Обработчик создания нового продукта
 	const handleCreateProduct = useCallback(() => {
 		// TODO: Открыть форму создания продукта
-		console.log('Create new product');
 	}, []);
 
 	return (
@@ -132,7 +130,7 @@ export default function ProductsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-neon glyph-glow'>
-										{shopStats?.totalProducts || 0}
+										{shopStats?.total || 0}
 									</div>
 									<div className='text-sm text-soft'>
 										Всего продуктов
@@ -151,7 +149,7 @@ export default function ProductsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-cyan glyph-glow'>
-										{shopStats?.activeProducts || 0}
+										{shopStats?.active || 0}
 									</div>
 									<div className='text-sm text-soft'>
 										Активные
@@ -185,10 +183,10 @@ export default function ProductsPage() {
 							<div className='flex items-center justify-between'>
 								<div>
 									<div className='text-2xl font-bold text-yellow-400 glyph-glow'>
-										{shopStats?.totalValue?.toFixed(0) || 0}
+										{shopStats?.avgPrice?.toFixed(0) || 0}
 									</div>
 									<div className='text-sm text-soft'>
-										Общая стоимость (₽)
+										Средняя цена (₽)
 									</div>
 								</div>
 								<NeonIcon
@@ -232,7 +230,7 @@ export default function ProductsPage() {
 										:	'bg-subtle border-line text-soft hover:border-cyan'
 									}`}
 								>
-									{cat.name} ({cat.count})
+									{cat.name} ({cat._count.products})
 								</button>
 							))}
 						</div>

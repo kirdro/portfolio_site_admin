@@ -110,7 +110,7 @@ export default function ContactsPage() {
 		(item: Contact) => {
 			updateMutation.mutate({
 				id: item.id,
-				data: { isActive: !item.isActive },
+				isActive: !item.isActive,
 			});
 		},
 		[updateMutation],
@@ -127,19 +127,25 @@ export default function ContactsPage() {
 				return;
 			}
 
-			const data = {
-				type: formData.type.trim(),
-				label: formData.label.trim(),
-				value: formData.value.trim(),
-				icon: formData.icon.trim() || null,
-				isActive: formData.isActive,
-				order,
-			};
-
 			if (editingItem) {
-				updateMutation.mutate({ id: editingItem.id, data });
+				updateMutation.mutate({
+					id: editingItem.id,
+					type: formData.type.trim(),
+					label: formData.label.trim(),
+					value: formData.value.trim(),
+					icon: formData.icon.trim() || undefined,
+					isActive: formData.isActive,
+					order,
+				});
 			} else {
-				createMutation.mutate(data);
+				createMutation.mutate({
+					type: formData.type.trim(),
+					label: formData.label.trim(),
+					value: formData.value.trim(),
+					icon: formData.icon.trim() || undefined,
+					isActive: formData.isActive,
+					order,
+				});
 			}
 		},
 		[formData, editingItem, createMutation, updateMutation],

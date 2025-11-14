@@ -66,7 +66,13 @@ export default function Shop3DLayout({
 			<div className='bg-panel border border-line rounded-lg bevel overflow-hidden'>
 				<div className='flex overflow-x-auto'>
 					{tabs.map((tab) => {
-						const isActive = pathname === tab.href;
+						// Проверяем активность таба
+						// Нормализуем пути для сравнения
+						const normalizedPathname = pathname.replace(/\/$/, ''); // убираем слеш в конце
+						const normalizedHref = tab.href.replace(/\/$/, ''); // убираем слеш в конце
+
+						const isActive = normalizedPathname === normalizedHref ||
+										normalizedPathname.startsWith(normalizedHref + '/');
 
 						return (
 							<Link
@@ -74,11 +80,11 @@ export default function Shop3DLayout({
 								href={tab.href}
 								className={`
                   flex items-center gap-2 px-6 py-4 font-mono text-sm
-                  border-b-2 transition-all duration-200 whitespace-nowrap
+                  transition-all duration-300 whitespace-nowrap relative
                   ${
 										isActive ?
-											'border-neon bg-neon/10 text-neon'
-										:	'border-transparent text-soft hover:bg-hover'
+											'text-neon bg-neon/10'
+										:	'text-soft hover:bg-hover'
 									}
                 `}
 							>
@@ -88,6 +94,15 @@ export default function Shop3DLayout({
 									variant={isActive ? 'intense' : 'subtle'}
 								/>
 								<span>{tab.label}</span>
+								{/* Подчёркивание снизу */}
+								<div
+									className={`absolute bottom-0 left-0 right-0 transition-all duration-300`}
+									style={{
+										height: isActive ? '4px' : '2px',
+										backgroundColor: isActive ? '#00FF99' : 'rgba(255,255,255,0.1)',
+										boxShadow: isActive ? '0 0 20px #00FF99' : 'none'
+									}}
+								/>
 							</Link>
 						);
 					})}
