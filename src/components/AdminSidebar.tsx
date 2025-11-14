@@ -15,6 +15,7 @@ import {
 	FaPen,
 	FaEnvelope,
 	FaCog,
+	FaCube,
 	FaChevronLeft,
 	FaChevronRight,
 } from 'react-icons/fa';
@@ -55,6 +56,12 @@ const menuItems: MenuItem[] = [
 		label: 'Навыки',
 		icon: FaBolt,
 		description: 'Управление навыками',
+	},
+	{
+		href: '/shop3d',
+		label: '3D Магазин',
+		icon: FaCube,
+		description: 'Интернет-магазин 3D деталей',
 	},
 	{
 		href: '/profile',
