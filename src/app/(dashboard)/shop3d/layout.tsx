@@ -78,7 +78,7 @@ export default function Shop3DLayout({
                   ${
 										isActive ?
 											'border-neon bg-neon/10 text-neon'
-										:	'border-transparent text-soft hover:text-base hover:bg-hover'
+										:	'border-transparent text-soft hover:bg-hover'
 									}
                 `}
 							>
