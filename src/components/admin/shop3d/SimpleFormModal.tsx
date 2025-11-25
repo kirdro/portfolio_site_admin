@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { Modal, ModalHeader, ModalBody, ModalFooter } from '../../ui/Modal';
 import { NeonIcon } from '../../ui/NeonIcon';
 import { FaSave, FaTimes } from 'react-icons/fa';

@@ -95,7 +95,7 @@ export default function CategoriesPage() {
 		(item: Category) => {
 			updateMutation.mutate({
 				id: item.id,
-				data: { isActive: !item.isActive },
+				isActive: !item.isActive,
 			});
 		},
 		[updateMutation],
@@ -108,12 +108,12 @@ export default function CategoriesPage() {
 
 			const data = {
 				name: formData.name.trim(),
-				description: formData.description.trim() || null,
+				description: formData.description.trim() || undefined,
 				isActive: formData.isActive,
 			};
 
 			if (editingItem) {
-				updateMutation.mutate({ id: editingItem.id, data });
+				updateMutation.mutate({ id: editingItem.id, ...data });
 			} else {
 				createMutation.mutate(data);
 			}

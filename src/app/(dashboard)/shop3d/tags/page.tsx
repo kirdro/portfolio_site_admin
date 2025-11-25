@@ -11,7 +11,7 @@ interface Tag {
 	id: string;
 	name: string;
 	description: string | null;
-	color: string;
+	color: string | null;
 	isActive: boolean;
 }
 
@@ -79,7 +79,7 @@ export default function TagsPage() {
 		setFormData({
 			name: item.name,
 			description: item.description || '',
-			color: item.color,
+			color: item.color || '#00FF99',
 			isActive: item.isActive,
 		});
 		setIsFormOpen(true);
@@ -100,7 +100,7 @@ export default function TagsPage() {
 		(item: Tag) => {
 			updateMutation.mutate({
 				id: item.id,
-				data: { isActive: !item.isActive },
+				isActive: !item.isActive,
 			});
 		},
 		[updateMutation],
@@ -113,13 +113,13 @@ export default function TagsPage() {
 
 			const data = {
 				name: formData.name.trim(),
-				description: formData.description.trim() || null,
+				description: formData.description.trim() || undefined,
 				color: formData.color.trim(),
 				isActive: formData.isActive,
 			};
 
 			if (editingItem) {
-				updateMutation.mutate({ id: editingItem.id, data });
+				updateMutation.mutate({ id: editingItem.id, ...data });
 			} else {
 				createMutation.mutate(data);
 			}
@@ -170,7 +170,7 @@ export default function TagsPage() {
 				renderItem={(item: Tag) => ({
 					title: item.name,
 					subtitle: item.description || undefined,
-					badge: item.color,
+					badge: item.color || undefined,
 					isActive: item.isActive,
 				})}
 			/>
