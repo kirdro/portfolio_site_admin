@@ -20,8 +20,8 @@ RUN apt-get update -y && apt-get install -y openssl
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Генерируем Prisma клиент
-RUN bunx prisma generate
+# Создаём директорию и генерируем Prisma клиент
+RUN mkdir -p src/generated && bunx prisma generate && ls -la src/generated/prisma/
 
 # Сборка приложения для продакшена  
 ENV NODE_ENV=production
