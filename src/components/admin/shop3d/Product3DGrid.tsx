@@ -8,14 +8,26 @@ interface Product {
 	name: string;
 	description?: string | null;
 	price: number;
-	category?: { id: string; name: string } | string | null;
+	category?: { id: string; name: string } | null;
+	categoryId?: string | null;
 	quantity?: number | null;
 	isActive: boolean;
+	isFeatured?: boolean;
 	images?: string[];
 	files?: Array<{
 		id: string;
 		s3Url: string;
 		originalName: string;
+	}>;
+	plastics?: Array<{
+		plastic: {
+			id: string;
+			name: string;
+		}
+	}>;
+	tags?: Array<{
+		id: string;
+		name: string;
 	}>;
 }
 

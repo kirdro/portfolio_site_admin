@@ -8,7 +8,7 @@ interface Product3DCardProps {
 		name: string;
 		description?: string | null;
 		price: number;
-		category?: { id: string; name: string } | string | null;
+		category?: { id: string; name: string } | null;
 		quantity?: number | null;
 		isActive: boolean;
 		images?: string[];
@@ -87,7 +87,7 @@ export const Product3DCard = React.memo(function Product3DCard({
 					<div className='flex items-center gap-2'>
 						<NeonIcon Icon={FaBox} size={14} variant='subtle' />
 						<span className='text-xs text-soft font-mono'>
-							{typeof product.category === 'object' ? product.category.name : product.category}
+							{product.category.name}
 						</span>
 					</div>
 				)}

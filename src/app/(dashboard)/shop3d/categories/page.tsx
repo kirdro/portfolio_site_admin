@@ -50,7 +50,9 @@ export default function CategoriesPage() {
 		},
 	});
 	const deleteMutation = api.shop3d.categories.delete.useMutation({
-		onSuccess: refetch,
+		onSuccess: () => {
+			refetch();
+		},
 	});
 
 	// Сброс формы

@@ -53,7 +53,9 @@ export default function TagsPage() {
 		},
 	});
 	const deleteMutation = api.shop3d.tags.delete.useMutation({
-		onSuccess: refetch,
+		onSuccess: () => {
+			refetch();
+		},
 	});
 
 	// Сброс формы

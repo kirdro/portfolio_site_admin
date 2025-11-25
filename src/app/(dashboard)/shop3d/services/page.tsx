@@ -59,7 +59,9 @@ export default function ServicesPage() {
 		},
 	});
 	const deleteMutation = api.shop3d.services.delete.useMutation({
-		onSuccess: refetch,
+		onSuccess: () => {
+			refetch();
+		},
 	});
 
 	// Сброс формы

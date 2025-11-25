@@ -62,7 +62,9 @@ export default function PlasticsPage() {
 		},
 	});
 	const deleteMutation = api.shop3d.plastics.delete.useMutation({
-		onSuccess: refetch,
+		onSuccess: () => {
+			refetch();
+		},
 	});
 
 	// Сброс формы

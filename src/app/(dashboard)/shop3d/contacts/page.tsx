@@ -59,7 +59,9 @@ export default function ContactsPage() {
 		},
 	});
 	const deleteMutation = api.shop3d.contacts.delete.useMutation({
-		onSuccess: refetch,
+		onSuccess: () => {
+			refetch();
+		},
 	});
 
 	// Сброс формы

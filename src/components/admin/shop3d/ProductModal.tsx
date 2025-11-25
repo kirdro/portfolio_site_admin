@@ -46,7 +46,17 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 	const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
 	const { data: categories } = api.shop3d.categories.getAll.useQuery();
-	const { data: plastics } = api.shop3d.plastics.getAll.useQuery();
+	const { data: plastics } = api.shop3d.plastics.getAll.useQuery() as {
+		data: Array<{
+			id: string;
+			name: string;
+			material: string;
+			color: string;
+			colorHex: string | null;
+			pricePerGram: number | null;
+			isActive: boolean;
+		}> | undefined;
+	};
 	const { data: tags } = api.shop3d.tags.getAll.useQuery();
 
 	const uploadFile = api.files.upload.useMutation();
