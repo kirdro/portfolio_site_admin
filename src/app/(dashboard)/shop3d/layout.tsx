@@ -77,7 +77,7 @@ export default function Shop3DLayout({
 						return (
 							<Link
 								key={tab.href}
-								href={tab.href}
+								href={tab.href as any}
 								className={`
                   flex items-center gap-2 px-6 py-4 font-mono text-sm
                   transition-all duration-300 whitespace-nowrap relative
